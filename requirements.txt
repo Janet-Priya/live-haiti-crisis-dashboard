@@ -1,0 +1,5 @@
+google-generativeai
+geopy
+requests
+python-dotenv
+sqlite3
