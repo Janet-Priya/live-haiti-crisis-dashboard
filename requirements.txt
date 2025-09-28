@@ -1,9 +1,8 @@
-streamlit
-sqlite3
-pandas
-plotly
-google-generativeai
-geopy
-requests
-python-dotenv
-numpy
+streamlit==1.50.0
+pandas==2.2.3
+plotly==5.24.1
+google-generativeai==0.8.3
+geopy==2.4.1
+requests==2.32.3
+python-dotenv==1.0.1
+numpy==1.26.4
