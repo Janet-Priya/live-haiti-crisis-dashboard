@@ -302,7 +302,27 @@ with col5:
     """, unsafe_allow_html=True)
 # Extra Metrics Row
 st.markdown('<div class="section-header">Additional Insights</div>', unsafe_allow_html=True)
-col8 = st.columns(1)
+col6, col7, col8 = st.columns(3)
+
+# Total Fatalities (example if your DB has it)
+with col6:
+    fatalities = filtered["fatalities"].sum() if "fatalities" in filtered else 0
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-value">{fatalities:,}</div>
+        <div class="metric-label">Fatalities</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Average Response Time (dummy logic, replace if you have a field)
+with col7:
+    avg_response = np.random.uniform(1,5)  # replace w/ real calc
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-value">{avg_response:.1f} days</div>
+        <div class="metric-label">Avg Response Time</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Reported Sources
 with col8:
