@@ -1,1 +1,378 @@
+/* Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+* {
+    box-sizing: border-box;
+}
+
+body, .stApp {
+    background: linear-gradient(135deg, #0a0e1a 0%, #1a1f3a 50%, #0f1729 100%) !important;
+    color: #e4e9f2 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* Hide Streamlit branding */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* Main Container */
+.main .block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+    max-width: 100% !important;
+}
+
+/* Header */
+.main-header {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 24px;
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.main-header h1 {
+    font-size: 2.75rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.main-header p {
+    color: #94a3b8;
+    font-size: 1.05rem;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+}
+
+/* Section Headers */
+.section-header {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 2.5rem 0 1.5rem 0;
+    padding-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+    position: relative;
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+}
+
+/* Metric Cards */
+.metric-card {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 20px;
+    padding: 1.5rem;
+    text-align: center;
+    height: 145px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    border-color: rgba(99, 102, 241, 0.6);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'SF Mono', 'Consolas', monospace;
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.metric-change {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+}
+
+.metric-up {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.15);
+}
+
+.metric-down {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background: rgba(17, 24, 39, 0.8) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-right: 1px solid rgba(99, 102, 241, 0.3) !important;
+}
+
+section[data-testid="stSidebar"] > div {
+    background: transparent !important;
+    padding: 1.5rem !important;
+}
+
+.stMarkdown h3, 
+section[data-testid="stSidebar"] h3 {
+    color: #f1f5f9 !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 1rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    border-bottom: 2px solid rgba(99, 102, 241, 0.3) !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* Input Fields */
+div[data-baseweb="select"],
+.stMultiSelect > div,
+.stSelectbox > div {
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+div[data-baseweb="select"]:hover,
+.stMultiSelect > div:hover,
+.stSelectbox > div:hover {
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Multiselect tags */
+span[data-baseweb="tag"] {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.35rem 0.75rem !important;
+}
+
+/* Slider */
+.stSlider > div > div {
+    background: rgba(99, 102, 241, 0.2) !important;
+    border-radius: 10px !important;
+}
+
+.stSlider [role="slider"] {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+}
+
+.stSlider .st-bo {
+    color: #6366f1 !important;
+}
+
+/* Checkbox */
+.stCheckbox {
+    color: #e4e9f2 !important;
+}
+
+.stCheckbox input[type="checkbox"] {
+    accent-color: #6366f1 !important;
+}
+
+/* Date Input */
+.stDateInput > div {
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 14px !important;
+    transition: all 0.3s ease !important;
+}
+
+.stDateInput > div:hover {
+    border-color: rgba(99, 102, 241, 0.6) !important;
+}
+
+.stDateInput input {
+    color: #e4e9f2 !important;
+}
+
+/* Buttons */
+.stDownloadButton > button,
+.stButton > button {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 14px !important;
+    padding: 0.85rem 2.5rem !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4) !important;
+}
+
+.stDownloadButton > button:hover,
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5) !important;
+}
+
+/* Radio Buttons */
+.stRadio > div {
+    display: flex !important;
+    gap: 1rem !important;
+}
+
+.stRadio label {
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 14px !important;
+    padding: 0.85rem 1.75rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.stRadio label:hover {
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    background: rgba(99, 102, 241, 0.15) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* DataFrames */
+.dataframe {
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dataframe th {
+    background: rgba(99, 102, 241, 0.25) !important;
+    color: #f1f5f9 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 1px !important;
+    padding: 1rem !important;
+}
+
+.dataframe td {
+    color: #e4e9f2 !important;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1) !important;
+    padding: 0.85rem !important;
+}
+
+.dataframe tr:hover td {
+    background: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Plotly Charts */
+.js-plotly-plot {
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    background: rgba(17, 24, 39, 0.6) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    transition: transform 0.3s ease !important;
+}
+
+.js-plotly-plot:hover {
+    transform: translateY(-2px) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+}
+
+/* Alert Boxes */
+.stAlert {
+    background: rgba(30, 41, 59, 0.8) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 16px !important;
+    color: #e4e9f2 !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Expander */
+.streamlit-expanderHeader {
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 14px !important;
+    color: #e4e9f2 !important;
+    transition: all 0.3s ease !important;
+}
+
+.streamlit-expanderHeader:hover {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-color: rgba(99, 102, 241, 0.6) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-header h1 {
+        font-size: 2rem;
+    }
+    
+    .metric-card {
+        height: 130px;
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+    }
+}
