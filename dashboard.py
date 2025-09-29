@@ -302,7 +302,7 @@ with col5:
     """, unsafe_allow_html=True)
 # Extra Metrics Row
 st.markdown('<div class="section-header">Additional Insights</div>', unsafe_allow_html=True)
-col8 = st.columns(3)
+col8 = st.columns(1)
 
 # Reported Sources
 with col8:
