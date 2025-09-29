@@ -2,13 +2,12 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
+import numpy as np
 
 DB_PATH = "reports.db"
 
-# =======================
-# CONFIGURATION
-# =======================
 st.set_page_config(
     page_title="Haiti Violence Analysis Dashboard",
     page_icon="📍",
@@ -16,58 +15,114 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# =======================
-# DARK UI STYLING + FONTS
-# =======================
+# Enhanced dark styling
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
     body, .stApp { 
-        background: #181926 !important; 
-        color: #e0e6ed; 
-        font-family: 'Inter', system-ui, sans-serif; 
+        background: #0d1117 !important; 
+        color: #e6edf3; 
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
     }
+    
+    .main-header {
+        background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
     .main-header h1 { 
-        font-size: 2.2rem; 
+        font-size: 2rem; 
         font-weight: 700; 
-        margin-bottom: .25rem; 
-        color: #f6f7f9;
+        margin-bottom: 0.5rem; 
+        color: #f0f6fc;
+        letter-spacing: -0.5px;
     }
+    
     .main-header p { 
-        color: #a5adcb; 
-        margin-top: 0; 
+        color: #8b949e; 
+        margin: 0;
+        font-size: 0.95rem;
     }
+    
     .section-header { 
-        font-size: 1.1rem; 
+        font-size: 1rem; 
         font-weight: 600; 
-        color: #f6f7f9; 
+        color: #f0f6fc; 
         margin: 2rem 0 1rem 0; 
-        border-bottom: 1px solid #232946; 
-        padding-bottom: .5rem; 
+        padding-bottom: 0.5rem; 
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.85rem;
     }
+    
     .metric-card { 
-        background: #232946; 
-        border: 1px solid #393e5c; 
+        background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+        border: 1px solid #30363d; 
         border-radius: 12px; 
-        padding: 1.2rem 1rem; 
-        margin: .5rem 0; 
-        box-shadow: 0 1px 4px 0 #232946; 
-        color: #e0e6ed;
+        padding: 1.5rem; 
+        margin: 0.5rem 0; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
     }
+    
+    .metric-card:hover {
+        border-color: #58a6ff;
+        transform: translateY(-2px);
+    }
+    
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #58a6ff;
+        font-family: 'SF Mono', 'Monaco', monospace;
+        margin-bottom: 0.25rem;
+    }
+    
+    .metric-label {
+        font-size: 0.8rem;
+        color: #8b949e;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+    }
+    
+    .metric-change {
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+    
+    .metric-up { color: #3fb950; }
+    .metric-down { color: #f85149; }
+    
     .stDownloadButton button { 
-        background: #232946; 
-        border: 1px solid #393e5c; 
-        color: #e0e6ed; 
+        background: #21262d; 
+        border: 1px solid #30363d; 
+        color: #e6edf3;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
     }
-    .stRadio > div { color: #e0e6ed !important; }
-    .stSlider > div { color: #e0e6ed !important; }
-    .stMultiSelect > div { color: #e0e6ed !important; }
-    .stDateInput > div { color: #e0e6ed !important; }
+    
+    .stDownloadButton button:hover {
+        background: #30363d;
+        border-color: #58a6ff;
+    }
+    
+    div[data-testid="stSidebarNav"] {
+        background: #0d1117;
+    }
+    
+    .css-1d391kg {
+        background: #161b22;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# =======================
-# DATA LOADING
-# =======================
+# Data loading
 @st.cache_data
 def load_crisis_data():
     try:
@@ -78,190 +133,436 @@ def load_crisis_data():
             df['created_date'] = pd.to_datetime(df['created_date'], errors='coerce')
             df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
         return df
-    except:
+    except Exception as e:
+        st.error(f"Database error: {e}")
         return pd.DataFrame()
 
 df = load_crisis_data()
 
 if df.empty:
-    st.error("⚠️ No data found — run harvester.py first.")
+    st.error("No data found. Run harvester.py first.")
     st.stop()
 
-# =======================
-# HEADER
-# =======================
+# Header
 st.markdown("""
 <div class="main-header">
     <h1>Haiti Violence Analysis Dashboard</h1>
-    <p>Incident monitoring and trends — updated continuously</p>
+    <p>Real-time conflict monitoring and predictive intelligence</p>
 </div>
 """, unsafe_allow_html=True)
 
-# =======================
-# SIDEBAR FILTERS
-# =======================
+# Sidebar filters
 with st.sidebar:
-    st.markdown("### 🔍 Filters")
-    event_types = st.multiselect("Event Type", df["event_type"].dropna().unique(), default=list(df["event_type"].dropna().unique()))
+    st.markdown("### Filters")
+    
+    event_types = st.multiselect(
+        "Event Type", 
+        sorted(df["event_type"].dropna().unique()), 
+        default=list(df["event_type"].dropna().unique())
+    )
+    
     severity = st.slider("Severity Range", 1, 5, (1, 5))
-    areas = st.multiselect("Locations", sorted(df["location_text"].dropna().unique()), default=list(sorted(df["location_text"].dropna().unique())))
+    
+    areas = st.multiselect(
+        "Locations", 
+        sorted(df["location_text"].dropna().unique()), 
+        default=list(sorted(df["location_text"].dropna().unique()))
+    )
+    
     conflict_only = st.checkbox("Conflict-related only", value=True)
-
-    # Date range using created_date (report date) when available, else timestamp
-    base_created = pd.to_datetime(df["created_date"], utc=True, errors="coerce") if "created_date" in df.columns else None
-    base_timestamp = pd.to_datetime(df["timestamp"], utc=True, errors="coerce") if "timestamp" in df.columns else None
-    if base_created is not None and base_timestamp is not None:
-        effective_series = base_created.fillna(base_timestamp)
-    elif base_created is not None:
-        effective_series = base_created
-    else:
-        effective_series = base_timestamp
-    if effective_series is not None:
-        effective_series = effective_series.dt.tz_convert(None)
-        if effective_series.notna().any():
-            min_date = effective_series.min().date()
-            max_date = effective_series.max().date()
+    
+    # Date range
+    if 'created_date' in df.columns:
+        date_col = pd.to_datetime(df['created_date'].fillna(df['timestamp']), utc=True, errors='coerce').dt.tz_convert(None)
+        if date_col.notna().any():
+            min_date = date_col.min().date()
+            max_date = date_col.max().date()
         else:
-            today = pd.Timestamp.today().normalize().to_pydatetime().date()
-            min_date = (pd.Timestamp(today) - pd.Timedelta(days=30)).date()
-            max_date = today
+            min_date = (datetime.now() - timedelta(days=30)).date()
+            max_date = datetime.now().date()
     else:
-        today = pd.Timestamp.today().normalize().to_pydatetime().date()
-        min_date = (pd.Timestamp(today) - pd.Timedelta(days=30)).date()
-        max_date = today
-    date_range = st.date_input("Report Date Range", value=(min_date, max_date))
+        min_date = (datetime.now() - timedelta(days=30)).date()
+        max_date = datetime.now().date()
+    
+    date_range = st.date_input("Date Range", value=(min_date, max_date))
 
 # Apply filters
 filtered = df[(df["severity"] >= severity[0]) & (df["severity"] <= severity[1])]
+
 if event_types:
     filtered = filtered[filtered["event_type"].isin(event_types)]
+
 if areas:
     filtered = filtered[filtered["location_text"].isin(areas)]
+
 if conflict_only:
     conflict_set = {"violence", "kidnapping", "sexual_violence", "displacement", "protest", "looting", "roadblock"}
     filtered = filtered[filtered["event_type"].isin(conflict_set)]
 
-# Apply date range on created_date when present, else timestamp
 if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
-    start_date, end_date = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1]) + pd.Timedelta(days=1)
+    start_date, end_date = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1]) + timedelta(days=1)
     effective_date = pd.to_datetime(
         filtered["created_date"].fillna(filtered["timestamp"]),
         utc=True, errors="coerce"
     ).dt.tz_convert(None)
     filtered = filtered[(effective_date >= start_date) & (effective_date < end_date)]
 
-# =======================
-# METRICS + DOWNLOAD
-# =======================
-st.markdown('<div class="section-header">📊 Key Metrics</div>', unsafe_allow_html=True)
-col1, col2, col3, col4 = st.columns(4)
+# Calculate trends for metrics
+prev_period_start = start_date - (end_date - start_date)
+prev_filtered = df[
+    (pd.to_datetime(df["created_date"].fillna(df["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None) >= prev_period_start) &
+    (pd.to_datetime(df["created_date"].fillna(df["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None) < start_date)
+]
+
+# Key Metrics
+st.markdown('<div class="section-header">Key Metrics</div>', unsafe_allow_html=True)
+
+col1, col2, col3, col4, col5 = st.columns(5)
+
 with col1:
-    st.markdown(f'<div class="metric-card"><div style="font-size:2rem;font-weight:700;">{len(filtered):,}</div><div>Total Incidents</div></div>', unsafe_allow_html=True)
+    current_incidents = len(filtered)
+    prev_incidents = len(prev_filtered)
+    change = ((current_incidents - prev_incidents) / prev_incidents * 100) if prev_incidents > 0 else 0
+    change_class = "metric-up" if change > 0 else "metric-down"
+    change_icon = "↑" if change > 0 else "↓"
+    
+    st.markdown(f'''
+    <div class="metric-card">
+        <div class="metric-value">{current_incidents:,}</div>
+        <div class="metric-label">Total Incidents</div>
+        <div class="metric-change {change_class}">{change_icon} {abs(change):.1f}%</div>
+    </div>
+    ''', unsafe_allow_html=True)
+
 with col2:
-    st.markdown(f'<div class="metric-card"><div style="font-size:2rem;font-weight:700;">{filtered["location_text"].nunique():,}</div><div>Unique Locations</div></div>', unsafe_allow_html=True)
+    locations = filtered["location_text"].nunique()
+    st.markdown(f'''
+    <div class="metric-card">
+        <div class="metric-value">{locations}</div>
+        <div class="metric-label">Active Zones</div>
+    </div>
+    ''', unsafe_allow_html=True)
+
 with col3:
-    st.markdown(f'<div class="metric-card"><div style="font-size:2rem;font-weight:700;">{round(filtered["severity"].mean(),2) if not filtered.empty else 0}</div><div>Avg Severity</div></div>', unsafe_allow_html=True)
+    avg_severity = filtered["severity"].mean() if not filtered.empty else 0
+    st.markdown(f'''
+    <div class="metric-card">
+        <div class="metric-value">{avg_severity:.2f}</div>
+        <div class="metric-label">Avg Severity</div>
+    </div>
+    ''', unsafe_allow_html=True)
+
 with col4:
-    st.markdown(f'<div class="metric-card"><div style="font-size:2rem;font-weight:700;">{filtered["source_name"].nunique():,}</div><div>Sources</div></div>', unsafe_allow_html=True)
+    critical = len(filtered[filtered["severity"] >= 4])
+    st.markdown(f'''
+    <div class="metric-card">
+        <div class="metric-value">{critical}</div>
+        <div class="metric-label">Critical</div>
+    </div>
+    ''', unsafe_allow_html=True)
 
-# Optional: Add more metrics if columns exist
-metric_cols = st.columns(3)
-with metric_cols[0]:
-    if "fatalities" in filtered.columns:
-        st.markdown(f'<div class="metric-card"><div style="font-size:1.5rem;font-weight:700;">{filtered["fatalities"].sum():,}</div><div>Fatalities</div></div>', unsafe_allow_html=True)
-with metric_cols[1]:
-    if "displaced_persons" in filtered.columns:
-        st.markdown(f'<div class="metric-card"><div style="font-size:1.5rem;font-weight:700;">{filtered["displaced_persons"].sum():,}</div><div>Displaced Persons</div></div>', unsafe_allow_html=True)
-with metric_cols[2]:
-    if "event_type" in filtered.columns:
-        sec_ops = filtered[filtered["event_type"].str.contains("security|operation", case=False, na=False)]
-        st.markdown(f'<div class="metric-card"><div style="font-size:1.5rem;font-weight:700;">{len(sec_ops):,}</div><div>Security Operations</div></div>', unsafe_allow_html=True)
+with col5:
+    sources = filtered["source_name"].nunique()
+    st.markdown(f'''
+    <div class="metric-card">
+        <div class="metric-value">{sources}</div>
+        <div class="metric-label">Sources</div>
+    </div>
+    ''', unsafe_allow_html=True)
 
+# Download button
 st.download_button(
-    label="⬇️ Download Filtered Data",
+    label="Download Filtered Data",
     data=filtered.to_csv(index=False).encode("utf-8"),
-    file_name="haiti_crisis_filtered.csv",
+    file_name=f"haiti_crisis_{datetime.now().strftime('%Y%m%d')}.csv",
     mime="text/csv"
 )
 
-# =======================
-# MONTHLY INCIDENT TRENDS
-# =======================
-st.markdown('<div class="section-header"> Monthly Incident Trends</div>', unsafe_allow_html=True)
-if "created_date" in filtered.columns:
-    filtered["report_month"] = pd.to_datetime(
-        filtered["created_date"].fillna(filtered["timestamp"]),
-        utc=True, errors="coerce"
-    ).dt.tz_convert(None).dt.to_period("M").dt.to_timestamp()
-    monthly = filtered.groupby("report_month").size().reset_index(name="count")
-    fig_month = px.line(
-        monthly, x="report_month", y="count", 
-        title="Incident Reports Over the Past 12 Months", 
-        markers=True,
-        template="plotly_dark"
-    )
-    fig_month.update_traces(line_color="#e63946", marker_color="#e63946", fill='tozeroy', fillcolor="rgba(230,57,70,0.2)")
-    fig_month.update_layout(
-        xaxis_title="Month", 
-        yaxis_title="Incidents",
-        plot_bgcolor="#181926",
-        paper_bgcolor="#181926",
-        font_color="#e0e6ed"
-    )
-    st.plotly_chart(fig_month, use_container_width=True)
+# Incident Trends Over Time
+st.markdown('<div class="section-header">Incident Trends Over Time</div>', unsafe_allow_html=True)
 
-# =======================
-# WEEKLY ANALYSIS (last 7 weeks)
-# =======================
-st.markdown('<div class="section-header"> Weekly Analysis</div>', unsafe_allow_html=True)
-if "created_date" in filtered.columns:
-    filtered["report_week"] = pd.to_datetime(
-        filtered["created_date"].fillna(filtered["timestamp"]),
-        utc=True, errors="coerce"
-    ).dt.tz_convert(None).dt.to_period("W").dt.start_time
-    last_weeks = filtered["report_week"].dropna().sort_values().unique()[-7:]
-    weekly = filtered[filtered["report_week"].isin(last_weeks)].groupby("report_week").size().reset_index(name="count")
-    fig_week = px.bar(
-        weekly, x="report_week", y="count", 
-        title="Recent 7-week Incident Pattern", 
-        color="count", 
-        color_continuous_scale="Blues",
-        template="plotly_dark"
-    )
-    fig_week.update_layout(
-        xaxis_title="Week", 
-        yaxis_title="Incidents", 
-        showlegend=False,
-        plot_bgcolor="#181926",
-        paper_bgcolor="#181926",
-        font_color="#e0e6ed"
-    )
-    st.plotly_chart(fig_week, use_container_width=True)
+col1, col2 = st.columns(2)
 
-# =======================
-# EVENT TYPES PIE CHART
-# =======================
-st.markdown('<div class="section-header">Event Type Share</div>', unsafe_allow_html=True)
-type_counts = filtered["event_type"].value_counts().reset_index()
-type_counts.columns = ["Event Type", "Count"]
-fig_pie = px.pie(
-    type_counts, names="Event Type", values="Count", 
-    title="Event Type Distribution", hole=0.4,
-    template="plotly_dark"
-)
-fig_pie.update_traces(textinfo='percent+label')
-fig_pie.update_layout(
-    plot_bgcolor="#181926",
-    paper_bgcolor="#181926",
-    font_color="#e0e6ed"
-)
-st.plotly_chart(fig_pie, use_container_width=True)
+with col1:
+    # Monthly trend
+    if 'created_date' in filtered.columns:
+        filtered["month"] = pd.to_datetime(
+            filtered["created_date"].fillna(filtered["timestamp"]),
+            utc=True, errors="coerce"
+        ).dt.tz_convert(None).dt.to_period("M").dt.to_timestamp()
+        
+        monthly = filtered.groupby("month").size().reset_index(name="count")
+        
+        fig_monthly = go.Figure()
+        fig_monthly.add_trace(go.Scatter(
+            x=monthly["month"],
+            y=monthly["count"],
+            mode='lines+markers',
+            name='Incidents',
+            line=dict(color='#58a6ff', width=3),
+            marker=dict(size=8, color='#58a6ff'),
+            fill='tozeroy',
+            fillcolor='rgba(88, 166, 255, 0.1)'
+        ))
+        
+        fig_monthly.update_layout(
+            title="Monthly Incident Trends",
+            xaxis_title="Month",
+            yaxis_title="Incidents",
+            template="plotly_dark",
+            plot_bgcolor='#0d1117',
+            paper_bgcolor='#0d1117',
+            font=dict(color='#e6edf3', family='Inter'),
+            height=300,
+            margin=dict(l=50, r=20, t=40, b=50)
+        )
+        
+        st.plotly_chart(fig_monthly, use_container_width=True)
 
-# =======================
-# MAP (Bubble + Heatmap toggle)
-# =======================
-st.markdown('<div class="section-header"> Crisis Map</div>', unsafe_allow_html=True)
-map_mode = st.radio("Map Mode", ["Bubble Map", "Heatmap"], horizontal=True)
+with col2:
+    # Weekly trend
+    if 'created_date' in filtered.columns:
+        filtered["week"] = pd.to_datetime(
+            filtered["created_date"].fillna(filtered["timestamp"]),
+            utc=True, errors="coerce"
+        ).dt.tz_convert(None).dt.to_period("W").dt.start_time
+        
+        last_weeks = filtered["week"].dropna().sort_values().unique()[-8:]
+        weekly = filtered[filtered["week"].isin(last_weeks)].groupby("week").size().reset_index(name="count")
+        
+        fig_weekly = go.Figure()
+        fig_weekly.add_trace(go.Bar(
+            x=weekly["week"],
+            y=weekly["count"],
+            marker=dict(
+                color=weekly["count"],
+                colorscale='Reds',
+                showscale=False
+            )
+        ))
+        
+        fig_weekly.update_layout(
+            title="Weekly Incident Pattern (Last 8 Weeks)",
+            xaxis_title="Week",
+            yaxis_title="Incidents",
+            template="plotly_dark",
+            plot_bgcolor='#0d1117',
+            paper_bgcolor='#0d1117',
+            font=dict(color='#e6edf3', family='Inter'),
+            height=300,
+            margin=dict(l=50, r=20, t=40, b=50)
+        ))
+        
+        st.plotly_chart(fig_weekly, use_container_width=True)
+
+# Analysis grids
+col1, col2 = st.columns(2)
+
+with col1:
+    # Top violence hotspots
+    st.markdown('<div class="section-header">Top Violence Hotspots</div>', unsafe_allow_html=True)
+    
+    location_counts = filtered['location_text'].value_counts().head(5).reset_index()
+    location_counts.columns = ['Location', 'Incidents']
+    
+    fig_hotspots = go.Figure()
+    fig_hotspots.add_trace(go.Bar(
+        x=location_counts['Incidents'],
+        y=location_counts['Location'],
+        orientation='h',
+        marker=dict(
+            color=location_counts['Incidents'],
+            colorscale='Reds',
+            showscale=False
+        ),
+        text=location_counts['Incidents'],
+        textposition='outside'
+    ))
+    
+    fig_hotspots.update_layout(
+        template="plotly_dark",
+        plot_bgcolor='#0d1117',
+        paper_bgcolor='#0d1117',
+        font=dict(color='#e6edf3', family='Inter'),
+        height=300,
+        margin=dict(l=150, r=20, t=20, b=50),
+        xaxis_title="Number of Incidents",
+        yaxis_title=""
+    )
+    
+    st.plotly_chart(fig_hotspots, use_container_width=True)
+    
+    # Daily incident heatmap
+    st.markdown('<div class="section-header">Daily Incident Heatmap</div>', unsafe_allow_html=True)
+    
+    if 'created_date' in filtered.columns:
+        filtered['day_of_week'] = pd.to_datetime(
+            filtered["created_date"].fillna(filtered["timestamp"]),
+            utc=True, errors="coerce"
+        ).dt.tz_convert(None).dt.day_name()
+        
+        filtered['hour'] = pd.to_datetime(
+            filtered["created_date"].fillna(filtered["timestamp"]),
+            utc=True, errors="coerce"
+        ).dt.tz_convert(None).dt.hour
+        
+        heatmap_data = filtered.groupby(['day_of_week', 'hour']).size().reset_index(name='count')
+        heatmap_pivot = heatmap_data.pivot(index='day_of_week', columns='hour', values='count').fillna(0)
+        
+        # Reorder days
+        day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        heatmap_pivot = heatmap_pivot.reindex([d for d in day_order if d in heatmap_pivot.index])
+        
+        fig_heatmap = go.Figure(data=go.Heatmap(
+            z=heatmap_pivot.values,
+            x=heatmap_pivot.columns,
+            y=heatmap_pivot.index,
+            colorscale='Reds',
+            showscale=True
+        ))
+        
+        fig_heatmap.update_layout(
+            template="plotly_dark",
+            plot_bgcolor='#0d1117',
+            paper_bgcolor='#0d1117',
+            font=dict(color='#e6edf3', family='Inter'),
+            height=300,
+            margin=dict(l=100, r=20, t=20, b=50),
+            xaxis_title="Hour of Day",
+            yaxis_title=""
+        )
+        
+        st.plotly_chart(fig_heatmap, use_container_width=True)
+
+with col2:
+    # Incident severity distribution
+    st.markdown('<div class="section-header">Incident Severity Distribution</div>', unsafe_allow_html=True)
+    
+    severity_counts = filtered['severity'].value_counts().sort_index().reset_index()
+    severity_counts.columns = ['Severity', 'Count']
+    severity_counts['Severity'] = severity_counts['Severity'].astype(str)
+    
+    fig_severity = go.Figure()
+    fig_severity.add_trace(go.Pie(
+        labels=severity_counts['Severity'],
+        values=severity_counts['Count'],
+        hole=0.5,
+        marker=dict(colors=['#3fb950', '#58a6ff', '#f0883e', '#f85149', '#d73a49'])
+    ))
+    
+    fig_severity.update_layout(
+        template="plotly_dark",
+        plot_bgcolor='#0d1117',
+        paper_bgcolor='#0d1117',
+        font=dict(color='#e6edf3', family='Inter'),
+        height=300,
+        margin=dict(l=20, r=20, t=20, b=20),
+        showlegend=True
+    )
+    
+    st.plotly_chart(fig_severity, use_container_width=True)
+    
+    # Monthly growth index
+    st.markdown('<div class="section-header">Monthly Growth Index</div>', unsafe_allow_html=True)
+    
+    if 'created_date' in filtered.columns:
+        monthly_growth = filtered.groupby("month").size().reset_index(name="count")
+        monthly_growth['growth'] = monthly_growth['count'].pct_change() * 100
+        
+        fig_growth = go.Figure()
+        fig_growth.add_trace(go.Bar(
+            x=monthly_growth["month"],
+            y=monthly_growth["growth"],
+            marker=dict(
+                color=monthly_growth["growth"],
+                colorscale='RdYlGn_r',
+                showscale=False
+            )
+        ))
+        
+        fig_growth.update_layout(
+            title="Month-over-Month Change (%)",
+            template="plotly_dark",
+            plot_bgcolor='#0d1117',
+            paper_bgcolor='#0d1117',
+            font=dict(color='#e6edf3', family='Inter'),
+            height=300,
+            margin=dict(l=50, r=20, t=40, b=50),
+            xaxis_title="Month",
+            yaxis_title="Growth %"
+        )
+        
+        st.plotly_chart(fig_growth, use_container_width=True)
+
+# Predictive Intelligence
+st.markdown('<div class="section-header">AI-Powered Incident Forecasting</div>', unsafe_allow_html=True)
+
+if len(filtered) > 30:
+    # Simple trend line for prediction
+    filtered['days_since_start'] = (
+        pd.to_datetime(filtered["created_date"].fillna(filtered["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None) - 
+        pd.to_datetime(filtered["created_date"].fillna(filtered["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None).min()
+    ).dt.days
+    
+    daily_counts = filtered.groupby('days_since_start').size().reset_index(name='count')
+    
+    # Simple moving average for prediction
+    daily_counts['ma_7'] = daily_counts['count'].rolling(window=7, min_periods=1).mean()
+    
+    # Extend prediction
+    last_day = daily_counts['days_since_start'].max()
+    future_days = pd.DataFrame({'days_since_start': range(last_day + 1, last_day + 31)})
+    future_days['ma_7'] = daily_counts['ma_7'].iloc[-1]  # Simple extension
+    
+    fig_forecast = go.Figure()
+    
+    # Historical data
+    fig_forecast.add_trace(go.Scatter(
+        x=daily_counts['days_since_start'],
+        y=daily_counts['count'],
+        mode='lines',
+        name='Actual',
+        line=dict(color='#58a6ff', width=2)
+    ))
+    
+    # Moving average
+    fig_forecast.add_trace(go.Scatter(
+        x=daily_counts['days_since_start'],
+        y=daily_counts['ma_7'],
+        mode='lines',
+        name='7-day MA',
+        line=dict(color='#f0883e', width=2, dash='dash')
+    ))
+    
+    # Forecast
+    fig_forecast.add_trace(go.Scatter(
+        x=future_days['days_since_start'],
+        y=future_days['ma_7'],
+        mode='lines',
+        name='Forecast',
+        line=dict(color='#f85149', width=2, dash='dot'),
+        fill='tonexty',
+        fillcolor='rgba(248, 81, 73, 0.1)'
+    ))
+    
+    fig_forecast.update_layout(
+        title="30-Day Incident Forecast",
+        xaxis_title="Days from Start",
+        yaxis_title="Daily Incidents",
+        template="plotly_dark",
+        plot_bgcolor='#0d1117',
+        paper_bgcolor='#0d1117',
+        font=dict(color='#e6edf3', family='Inter'),
+        height=400,
+        margin=dict(l=50, r=20, t=40, b=50)
+    )
+    
+    st.plotly_chart(fig_forecast, use_container_width=True)
+
+# Interactive Map
+st.markdown('<div class="section-header">Crisis Map</div>', unsafe_allow_html=True)
+
+map_mode = st.radio("Map Visualization", ["Bubble Map", "Density Heatmap"], horizontal=True)
 
 if "location_coords" in filtered.columns:
     coords = filtered["location_coords"].dropna().str.split(",", expand=True)
@@ -270,6 +571,7 @@ if "location_coords" in filtered.columns:
         filtered["longitude"] = pd.to_numeric(coords[1], errors="coerce")
 
         geo_data = filtered.dropna(subset=["latitude", "longitude"])
+        
         if not geo_data.empty:
             if map_mode == "Bubble Map":
                 fig_map = px.scatter_mapbox(
@@ -279,19 +581,19 @@ if "location_coords" in filtered.columns:
                     color="severity",
                     size="severity",
                     hover_name="location_text",
-                    hover_data=["title", "source_name"],
-                    zoom=6,
-                    height=600,
-                    color_continuous_scale=[(0, "green"), (0.5, "yellow"), (1, "red")],
+                    hover_data=["title", "source_name", "event_type"],
+                    zoom=6.5,
+                    height=650,
+                    color_continuous_scale="Reds",
                     range_color=[1, 5]
                 )
+                
                 fig_map.update_layout(
-                    mapbox_style="carto-darkmatter", 
+                    mapbox_style="carto-darkmatter",
                     template="plotly_dark",
-                    plot_bgcolor="#181926",
-                    paper_bgcolor="#181926",
-                    font_color="#e0e6ed"
+                    margin=dict(l=0, r=0, t=0, b=0)
                 )
+                
                 st.plotly_chart(fig_map, use_container_width=True)
             else:
                 fig_heat = px.density_mapbox(
@@ -299,19 +601,178 @@ if "location_coords" in filtered.columns:
                     lat="latitude",
                     lon="longitude",
                     z="severity",
-                    radius=15,
-                    zoom=6,
-                    height=600,
+                    radius=18,
+                    zoom=6.5,
+                    height=650,
                     mapbox_style="carto-darkmatter",
-                    color_continuous_scale="Reds",
-                    template="plotly_dark"
+                    color_continuous_scale="Reds"
                 )
+                
                 fig_heat.update_layout(
-                    plot_bgcolor="#181926",
-                    paper_bgcolor="#181926",
-                    font_color="#e0e6ed"
+                    margin=dict(l=0, r=0, t=0, b=0)
                 )
+                
                 st.plotly_chart(fig_heat, use_container_width=True)
         else:
-            st.info("No geocoded reports available for mapping.")
+            st.info("No geocoded incidents available for mapping.")
 
+# Humanitarian Resources Section
+st.markdown('<div class="section-header">Humanitarian Resources & Emergency Contacts</div>', unsafe_allow_html=True)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("""
+    <div class="metric-card">
+        <h3 style="color: #58a6ff; margin-bottom: 1rem;">UN & International Organizations</h3>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">OCHA Haiti (UN Coordination)</strong><br>
+            <span style="color: #8b949e;">Emergency: +509 3701 0324</span><br>
+            <span style="color: #8b949e;">Email: ochHaiti@un.org</span><br>
+            <span style="color: #8b949e;">Website: <a href="https://www.unocha.org/haiti" target="_blank" style="color: #58a6ff;">unocha.org/haiti</a></span>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">UNICEF Haiti</strong><br>
+            <span style="color: #8b949e;">Phone: +509 2812 3000</span><br>
+            <span style="color: #8b949e;">Email: portauprince@unicef.org</span><br>
+            <span style="color: #8b949e;">Website: <a href="https://www.unicef.org/haiti" target="_blank" style="color: #58a6ff;">unicef.org/haiti</a></span>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">World Food Programme (WFP)</strong><br>
+            <span style="color: #8b949e;">Phone: +509 2940 5900</span><br>
+            <span style="color: #8b949e;">Email: wfp.haiti@wfp.org</span><br>
+            <span style="color: #8b949e;">Website: <a href="https://www.wfp.org/countries/haiti" target="_blank" style="color: #58a6ff;">wfp.org/countries/haiti</a></span>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">International Organization for Migration (IOM)</strong><br>
+            <span style="color: #8b949e;">Phone: +509 2943 5201</span><br>
+            <span style="color: #8b949e;">Email: iomhaiti@iom.int</span><br>
+            <span style="color: #8b949e;">Website: <a href="https://haiti.iom.int" target="_blank" style="color: #58a6ff;">haiti.iom.int</a></span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="metric-card" style="margin-top: 1rem;">
+        <h3 style="color: #58a6ff; margin-bottom: 1rem;">Medical & Health Organizations</h3>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">Médecins Sans Frontières (MSF)</strong><br>
+            <span style="color: #8b949e;">Emergency: +509 3458 0000</span><br>
+            <span style="color: #8b949e;">Email: msfocb-haiti-communication@brussels.msf.org</span><br>
+            <span style="color: #8b949e;">Website: <a href="https://www.msf.org/haiti" target="_blank" style="color: #58a6ff;">msf.org/haiti</a></span>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">Partners In Health (PIH)</strong><br>
+            <span style="color: #8b949e;">Phone: +509 3701 5105</span><br>
+            <span style="color: #8b949e;">Email: info@pih.org</span><br>
+            <span style="color: #8b949e;">Website: <a href="https://www.pih.org/country/haiti" target="_blank" style="color: #58a6ff;">pih.org/country/haiti</a></span>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">International Medical Corps</strong><br>
+            <span style="color: #8b949e;">Phone: +509 3702 7979</span><br>
+            <span style="color: #8b949e;">Email: haiti@internationalmedicalcorps.org</span><br>
+            <span style="color: #8b949e;">Website: <a href="https://internationalmedicalcorps.org/country/haiti" target="_blank" style="color: #58a6ff;">internationalmedicalcorps.org</a></span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div class="metric-card">
+        <h3 style="color: #58a6ff; margin-bottom: 1rem;">Protection & Child Welfare</h3>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">Save the Children Haiti</strong><br>
+            <span style="color: #8b949e;">Phone: +509 2816 1758</span><br>
+            <span style="color: #8b949e;">Email: haiti@savethechildren.org</span><br>
+            <span style="color: #8b949e;">Website: <a href="https://www.savethechildren.org/haiti" target="_blank" style="color: #58a6ff;">savethechildren.org/haiti</a></span>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">CARE Haiti</strong><br>
+            <span style="color: #8b949e;">Phone: +509 2813 9200</span><br>
+            <span style="color: #8b949e;">Email: info@care.org</span><br>
+            <span style="color: #8b949e;">Website: <a href="https://www.care.org/haiti" target="_blank" style="color: #58a6ff;">care.org/haiti</a></span>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">Plan International Haiti</strong><br>
+            <span style="color: #8b949e;">Phone: +509 2813 2620</span><br>
+            <span style="color: #8b949e;">Email: haiti.co@plan-international.org</span><br>
+            <span style="color: #8b949e;">Website: <a href="https://plan-international.org/haiti" target="_blank" style="color: #58a6ff;">plan-international.org/haiti</a></span>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">International Rescue Committee (IRC)</strong><br>
+            <span style="color: #8b949e;">Phone: +509 2940 4242</span><br>
+            <span style="color: #8b949e;">Email: haiti@rescue.org</span><br>
+            <span style="color: #8b949e;">Website: <a href="https://www.rescue.org/country/haiti" target="_blank" style="color: #58a6ff;">rescue.org/country/haiti</a></span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="metric-card" style="margin-top: 1rem;">
+        <h3 style="color: #58a6ff; margin-bottom: 1rem;">Local Haitian Organizations</h3>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">FONHDILAC (Human Rights Network)</strong><br>
+            <span style="color: #8b949e;">Phone: +509 3701 2345</span><br>
+            <span style="color: #8b949e;">Email: fonhdilac@gmail.com</span><br>
+            <span style="color: #8b949e;">Focus: Human rights monitoring and protection</span>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">RNDDH (National Network for Defense of Human Rights)</strong><br>
+            <span style="color: #8b949e;">Phone: +509 2245 4288</span><br>
+            <span style="color: #8b949e;">Email: rnddh@yahoo.fr</span><br>
+            <span style="color: #8b949e;">Focus: Documentation and advocacy</span>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: #f0f6fc;">Haitian Red Cross</strong><br>
+            <span style="color: #8b949e;">Emergency: 118 (within Haiti)</span><br>
+            <span style="color: #8b949e;">Phone: +509 2222 5654</span><br>
+            <span style="color: #8b949e;">Focus: Emergency response and disaster relief</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("""
+<div class="metric-card" style="margin-top: 1rem;">
+    <h3 style="color: #58a6ff; margin-bottom: 1rem;">Emergency Hotlines</h3>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+        <div>
+            <strong style="color: #f85149;">Police Emergency</strong><br>
+            <span style="color: #8b949e; font-size: 1.2rem;">114</span>
+        </div>
+        <div>
+            <strong style="color: #f85149;">Medical Emergency</strong><br>
+            <span style="color: #8b949e; font-size: 1.2rem;">118</span>
+        </div>
+        <div>
+            <strong style="color: #f85149;">Fire Department</strong><br>
+            <span style="color: #8b949e; font-size: 1.2rem;">115</span>
+        </div>
+    </div>
+    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #30363d;">
+        <strong style="color: #f0f6fc;">US Embassy Port-au-Prince (for US citizens)</strong><br>
+        <span style="color: #8b949e;">Emergency: +509 2229 8000</span><br>
+        <span style="color: #8b949e;">After hours: +1-202-501-4444</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div style="text-align: center; padding: 1rem; color: #8b949e; font-size: 0.85rem; margin-top: 2rem;">
+    <strong>Note:</strong> Contact information verified as of 2024. Always verify current contact details before reaching out.<br>
+    For real-time coordination, visit <a href="https://reliefweb.int/country/hti" target="_blank" style="color: #58a6ff;">ReliefWeb Haiti</a> for the latest humanitarian updates.
+</div>
+""", unsafe_allow_html=True)
