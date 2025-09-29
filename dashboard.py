@@ -15,109 +15,91 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Enhanced dark styling
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
     body, .stApp { 
         background: #0d1117 !important; 
         color: #e6edf3; 
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+        font-family: 'Inter', sans-serif; 
     }
-    
+
+    /* Header styling */
     .main-header {
         background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
         border: 1px solid #30363d;
-        border-radius: 12px;
+        border-radius: 14px;
         padding: 2rem;
         margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-    
     .main-header h1 { 
         font-size: 2rem; 
         font-weight: 700; 
-        margin-bottom: 0.5rem; 
+        margin-bottom: 0.25rem; 
         color: #f0f6fc;
-        letter-spacing: -0.5px;
     }
-    
     .main-header p { 
         color: #8b949e; 
         margin: 0;
         font-size: 0.95rem;
     }
-    
+
+    /* Section titles */
     .section-header { 
-        font-size: 1rem; 
+        font-size: 0.9rem; 
         font-weight: 600; 
         color: #f0f6fc; 
         margin: 2rem 0 1rem 0; 
         padding-bottom: 0.5rem; 
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        font-size: 0.85rem;
+        border-bottom: 1px solid #30363d;
     }
-    
+
+    /* Metric cards */
     .metric-card { 
-        background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+        background: #161b22;
         border: 1px solid #30363d; 
         border-radius: 12px; 
-        padding: 1.5rem; 
-        margin: 0.5rem 0; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        transition: all 0.3s ease;
+        padding: 1rem; 
+        text-align: center;
+        height: 130px; /* uniform height */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        transition: all 0.2s ease-in-out;
     }
-    
     .metric-card:hover {
         border-color: #58a6ff;
         transform: translateY(-2px);
     }
-    
     .metric-value {
-        font-size: 2.5rem;
+        font-size: 1.8rem;
         font-weight: 700;
         color: #58a6ff;
-        font-family: 'SF Mono', 'Monaco', monospace;
-        margin-bottom: 0.25rem;
+        font-family: 'SF Mono', monospace;
     }
-    
     .metric-label {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: #8b949e;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        font-weight: 500;
     }
-    
-    .metric-change {
-        font-size: 0.85rem;
-        margin-top: 0.5rem;
-    }
-    
+    .metric-change { font-size: 0.85rem; margin-top: 0.3rem; }
     .metric-up { color: #3fb950; }
     .metric-down { color: #f85149; }
-    
-    .stDownloadButton button { 
-        background: #21262d; 
-        border: 1px solid #30363d; 
-        color: #e6edf3;
-        border-radius: 6px;
-        padding: 0.5rem 1rem;
-        font-weight: 500;
-    }
-    
-    .stDownloadButton button:hover {
-        background: #30363d;
-        border-color: #58a6ff;
-    }
-    
+
+    /* Sidebar */
     div[data-testid="stSidebarNav"] {
         background: #0d1117;
     }
-    
-    .css-1d391kg {
-        background: #161b22;
+
+    /* Chart containers */
+    .chart-box {
+        margin-bottom: 1.5rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -214,61 +196,65 @@ prev_filtered = df[
     (pd.to_datetime(df["created_date"].fillna(df["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None) < start_date)
 ]
 
-# Key Metrics
 st.markdown('<div class="section-header">Key Metrics</div>', unsafe_allow_html=True)
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
+# Total Incidents
 with col1:
     current_incidents = len(filtered)
     prev_incidents = len(prev_filtered)
     change = ((current_incidents - prev_incidents) / prev_incidents * 100) if prev_incidents > 0 else 0
-    change_class = "metric-up" if change > 0 else "metric-down"
-    change_icon = "↑" if change > 0 else "↓"
-    
-    st.markdown(f'''
+    change_class = "metric-up" if change >= 0 else "metric-down"
+    change_icon = "↑" if change >= 0 else "↓"
+    st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{current_incidents:,}</div>
         <div class="metric-label">Total Incidents</div>
         <div class="metric-change {change_class}">{change_icon} {abs(change):.1f}%</div>
     </div>
-    ''', unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
+# Active Zones
 with col2:
     locations = filtered["location_text"].nunique()
-    st.markdown(f'''
+    st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{locations}</div>
         <div class="metric-label">Active Zones</div>
     </div>
-    ''', unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
+# Avg Severity
 with col3:
     avg_severity = filtered["severity"].mean() if not filtered.empty else 0
-    st.markdown(f'''
+    st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{avg_severity:.2f}</div>
         <div class="metric-label">Avg Severity</div>
     </div>
-    ''', unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
+# Critical Cases
 with col4:
     critical = len(filtered[filtered["severity"] >= 4])
-    st.markdown(f'''
+    st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{critical}</div>
         <div class="metric-label">Critical</div>
     </div>
-    ''', unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
+# Sources
 with col5:
     sources = filtered["source_name"].nunique()
-    st.markdown(f'''
+    st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{sources}</div>
         <div class="metric-label">Sources</div>
     </div>
-    ''', unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+
 
 # Download button
 st.download_button(
