@@ -1,1 +1,654 @@
+/* Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, .stApp {
+    background: #0a0e1a !important;
+    color: #e4e9f2 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Animated background */
+body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+    animation: floatingBackground 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes floatingBackground {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(30px, -50px) rotate(5deg); }
+    66% { transform: translate(-20px, 20px) rotate(-5deg); }
+}
+
+/* Hide Streamlit branding */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* Main Container */
+.main .block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+    max-width: 100% !important;
+    position: relative;
+    z-index: 1;
+}
+
+/* Floating Header with Glassmorphism */
+.main-header {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 24px;
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 20px 60px rgba(99, 102, 241, 0.15);
+    position: relative;
+    overflow: hidden;
+    animation: floatIn 0.8s ease-out;
+}
+
+@keyframes floatIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.main-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+    animation: pulseGlow 4s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+.main-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.8), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.main-header h1 {
+    font-size: 2.75rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.5px;
+    text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+}
+
+.main-header p {
+    color: #94a3b8;
+    font-size: 1.05rem;
+    font-weight: 400;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.3px;
+}
+
+/* Section Headers with Floating Effect */
+.section-header {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 2.5rem 0 1.5rem 0;
+    padding-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+    position: relative;
+    animation: slideInLeft 0.6s ease-out;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    animation: expandWidth 0.8s ease-out;
+}
+
+@keyframes expandWidth {
+    from { width: 0; }
+    to { width: 100px; }
+}
+
+/* Floating Metric Cards with Advanced Glassmorphism */
+.metric-card {
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 20px;
+    padding: 1.5rem;
+    text-align: center;
+    height: 145px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: floatUp 0.6s ease-out backwards;
+}
+
+.metric-card:nth-child(1) { animation-delay: 0.1s; }
+.metric-card:nth-child(2) { animation-delay: 0.2s; }
+.metric-card:nth-child(3) { animation-delay: 0.3s; }
+.metric-card:nth-child(4) { animation-delay: 0.4s; }
+.metric-card:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes floatUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.metric-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.metric-card:hover {
+    border-color: rgba(99, 102, 241, 0.6);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+        0 0 30px rgba(99, 102, 241, 0.3);
+}
+
+.metric-card:hover::before {
+    opacity: 1;
+}
+
+.metric-card:hover::after {
+    opacity: 1;
+    animation: rotate 4s linear infinite;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'SF Mono', 'Consolas', monospace;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3));
+    animation: numberPulse 2s ease-in-out infinite;
+}
+
+@keyframes numberPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.metric-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+.metric-change {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.metric-up {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+.metric-down {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+
+/* Floating Sidebar with Glassmorphism */
+section[data-testid="stSidebar"] {
+    background: rgba(17, 24, 39, 0.8) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-right: 1px solid rgba(99, 102, 241, 0.3) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2) !important;
+}
+
+section[data-testid="stSidebar"] > div {
+    background: transparent !important;
+    padding: 1.5rem !important;
+}
+
+/* Sidebar Headers */
+.stMarkdown h3, 
+section[data-testid="stSidebar"] h3 {
+    color: #f1f5f9 !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 1rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    border-bottom: 2px solid rgba(99, 102, 241, 0.3) !important;
+    padding-bottom: 0.5rem !important;
+    position: relative !important;
+}
+
+.stMarkdown h3::after,
+section[data-testid="stSidebar"] h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+}
+
+/* Floating Input Fields */
+div[data-baseweb="select"],
+.stMultiSelect > div,
+.stSelectbox > div {
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+div[data-baseweb="select"]:hover,
+.stMultiSelect > div:hover,
+.stSelectbox > div:hover {
+    border-color: rgba(99, 102, 241, 0.7) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Floating Multiselect tags */
+span[data-baseweb="tag"] {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.35rem 0.75rem !important;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
+    transition: transform 0.2s ease !important;
+}
+
+span[data-baseweb="tag"]:hover {
+    transform: scale(1.05) !important;
+}
+
+/* Floating Slider */
+.stSlider > div > div {
+    background: rgba(99, 102, 241, 0.2) !important;
+    border-radius: 10px !important;
+}
+
+.stSlider [role="slider"] {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.5) !important;
+    transition: transform 0.2s ease !important;
+}
+
+.stSlider [role="slider"]:hover {
+    transform: scale(1.2) !important;
+}
+
+.stSlider .st-bo {
+    color: #6366f1 !important;
+}
+
+/* Checkbox with Glow */
+.stCheckbox {
+    color: #e4e9f2 !important;
+    transition: all 0.3s ease !important;
+}
+
+.stCheckbox:hover {
+    transform: translateX(2px) !important;
+}
+
+.stCheckbox input[type="checkbox"] {
+    accent-color: #6366f1 !important;
+}
+
+.stCheckbox input[type="checkbox"]:checked {
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5) !important;
+}
+
+/* Floating Date Input */
+.stDateInput > div {
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 14px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.stDateInput > div:hover {
+    border-color: rgba(99, 102, 241, 0.7) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.stDateInput input {
+    color: #e4e9f2 !important;
+}
+
+/* Floating Buttons with Glow */
+.stDownloadButton > button,
+.stButton > button {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 14px !important;
+    padding: 0.85rem 2.5rem !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 
+        0 4px 20px rgba(99, 102, 241, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.stDownloadButton > button::before,
+.stButton > button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.stDownloadButton > button:hover::before,
+.stButton > button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.stDownloadButton > button:hover,
+.stButton > button:hover {
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 
+        0 12px 40px rgba(99, 102, 241, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset !important;
+}
+
+/* Floating Radio Buttons */
+.stRadio > div {
+    display: flex !important;
+    gap: 1rem !important;
+}
+
+.stRadio label {
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 14px !important;
+    padding: 0.85rem 1.75rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.stRadio label:hover {
+    border-color: rgba(99, 102, 241, 0.7) !important;
+    background: rgba(99, 102, 241, 0.15) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Floating DataFrames */
+.dataframe {
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dataframe th {
+    background: rgba(99, 102, 241, 0.25) !important;
+    color: #f1f5f9 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 1px !important;
+    padding: 1rem !important;
+}
+
+.dataframe td {
+    color: #e4e9f2 !important;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1) !important;
+    padding: 0.85rem !important;
+    transition: background 0.2s ease !important;
+}
+
+.dataframe tr:hover td {
+    background: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Floating Plotly Charts */
+.js-plotly-plot {
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    background: rgba(17, 24, 39, 0.6) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset !important;
+    transition: transform 0.3s ease !important;
+}
+
+.js-plotly-plot:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+}
+
+/* Glowing Scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.8);
+}
+
+/* Floating Alert Boxes */
+.stAlert {
+    background: rgba(30, 41, 59, 0.8) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 16px !important;
+    color: #e4e9f2 !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    animation: slideInRight 0.5s ease-out !important;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Floating Expander */
+.streamlit-expanderHeader {
+    background: rgba(30, 41, 59, 0.6) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 14px !important;
+    color: #e4e9f2 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.streamlit-expanderHeader:hover {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    transform: translateX(4px) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-header h1 {
+        font-size: 2rem;
+    }
+    
+    .metric-card {
+        height: 130px;
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+    }
+    
+    body::before {
+        animation: floatingBackground 15s ease-in-out infinite;
+    }
+}
