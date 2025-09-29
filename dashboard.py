@@ -248,8 +248,8 @@ with col1:
             xaxis_title="Month",
             yaxis_title="Number of Incidents",
             template="plotly_dark",
-            plot_bgcolor='rgba(15, 23, 42, 0.5)',
-            paper_bgcolor='rgba(30, 41, 59, 0.4)',
+            plot_bgcolor='rgba(15, 23, 42, 0)',
+            paper_bgcolor='rgba(0, 0, 0, 0)',
             font=dict(color='#e4e9f2', family='Inter'),
             height=350,
             margin=dict(l=50, r=20, t=60, b=50),
@@ -287,8 +287,8 @@ with col2:
             xaxis_title="Week",
             yaxis_title="Number of Incidents",
             template="plotly_dark",
-            plot_bgcolor='rgba(15, 23, 42, 0.5)',
-            paper_bgcolor='rgba(30, 41, 59, 0.4)',
+            plot_bgcolor='rgba(15, 23, 42, 0)',
+            paper_bgcolor='rgba(0, 0, 0, 0)',
             font=dict(color='#e4e9f2', family='Inter'),
             height=350,
             margin=dict(l=50, r=20, t=60, b=50)
@@ -321,8 +321,8 @@ with col1:
     
     fig_hotspots.update_layout(
         template="plotly_dark",
-        plot_bgcolor='rgba(15, 23, 42, 0.5)',
-        paper_bgcolor='rgba(30, 41, 59, 0.4)',
+        plot_bgcolor='rgba(15, 23, 42, 0)',
+        paper_bgcolor='rgba(0, 0, 0, 0)',
         font=dict(color='#e4e9f2', family='Inter'),
         height=350,
         margin=dict(l=150, r=50, t=20, b=50),
@@ -364,8 +364,8 @@ with col1:
         
         fig_heatmap.update_layout(
             template="plotly_dark",
-            plot_bgcolor='rgba(15, 23, 42, 0.5)',
-            paper_bgcolor='rgba(30, 41, 59, 0.4)',
+            plot_bgcolor='rgba(15, 23, 42, 0)',
+            paper_bgcolor='rgba(0, 0, 0, 0)',
             font=dict(color='#e4e9f2', family='Inter'),
             height=350,
             margin=dict(l=100, r=20, t=20, b=50),
@@ -394,8 +394,8 @@ with col2:
     
     fig_severity.update_layout(
         template="plotly_dark",
-        plot_bgcolor='rgba(15, 23, 42, 0.5)',
-        paper_bgcolor='rgba(30, 41, 59, 0.4)',
+        plot_bgcolor='rgba(15, 23, 42, 0)',
+        paper_bgcolor='rgba(0, 0, 0, 0)',
         font=dict(color='#e4e9f2', family='Inter'),
         height=350,
         margin=dict(l=20, r=20, t=20, b=20),
@@ -429,8 +429,8 @@ with col2:
         fig_growth.update_layout(
             title="Month-over-Month Change (%)",
             template="plotly_dark",
-            plot_bgcolor='rgba(15, 23, 42, 0.5)',
-            paper_bgcolor='rgba(30, 41, 59, 0.4)',
+            plot_bgcolor='rgba(15, 23, 42, 0)',
+            paper_bgcolor='rgba(0, 0, 0, 0)',
             font=dict(color='#e4e9f2', family='Inter'),
             height=350,
             margin=dict(l=50, r=20, t=60, b=50),
@@ -490,8 +490,8 @@ if len(filtered) > 30:
         xaxis_title="Days from Data Start",
         yaxis_title="Daily Incidents",
         template="plotly_dark",
-        plot_bgcolor='rgba(15, 23, 42, 0.5)',
-        paper_bgcolor='rgba(30, 41, 59, 0.4)',
+        plot_bgcolor='rgba(15, 23, 42, 0)',
+        paper_bgcolor='rgba(0, 0, 0, 0)',
         font=dict(color='#e4e9f2', family='Inter'),
         height=450,
         margin=dict(l=50, r=20, t=60, b=50),
@@ -630,8 +630,8 @@ else:
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #94a3b8; padding: 2rem 0;'>
-    <p> Haiti Violence Analysis Dashboard | Data updated in real-time</p>
-    <p> Main source: ReliefWeb </p>
+    <p>🌍 Haiti Violence Analysis Dashboard | Data updated in real-time</p>
+    <p>📊 Main source: ReliefWeb</p>
     <p style='font-size: 0.85rem; margin-top: 0.5rem;'>Built with Streamlit & Plotly | © 2024</p>
 </div>
 """, unsafe_allow_html=True)
