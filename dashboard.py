@@ -101,9 +101,55 @@ st.markdown("""
     .chart-box {
         margin-bottom: 1.5rem;
     }
+/* Sidebar panel */
+    section[data-testid="stSidebar"] {
+        background-color: #161b22 !important;
+        padding: 1rem;
+    }
+/* Sidebar headers */
+    .css-1aumxhk, .stMarkdown h3 {
+        color: #f0f6fc !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.5rem !important;
+        text-transform: uppercase;
+        border-bottom: 1px solid #30363d;
+        padding-bottom: 0.3rem;
+    }
+
+/* Multiselect dropdowns */
+    div[data-baseweb="select"] {
+        background-color: #21262d !important;
+        border-radius: 8px !important;
+        border: 1px solid #30363d !important;
+        color: #e6edf3 !important;
+    }
+    div[data-baseweb="select"]:hover {
+        border-color: #58a6ff !important;
+    }
+
+/* Slider */
+    .stSlider > div > div {
+        background: #30363d !important;
+    }
+    .stSlider .st-bo {
+        color: #58a6ff !important;
+    }
+/* Checkbox */
+    .stCheckbox input[type="checkbox"] {
+        accent-color: #f85149 !important;
+    }
+/* Date input */
+    .stDateInput > div {
+        background: #21262d !important;
+        border: 1px solid #30363d !important;
+        border-radius: 8px !important;
+    }
+    .stDateInput input {
+        color: #e6edf3 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
-
 # Data loading
 @st.cache_data
 def load_crisis_data():
@@ -254,7 +300,39 @@ with col5:
         <div class="metric-label">Sources</div>
     </div>
     """, unsafe_allow_html=True)
+# Extra Metrics Row
+st.markdown('<div class="section-header">Additional Insights</div>', unsafe_allow_html=True)
+col6, col7, col8 = st.columns(3)
 
+# Total Fatalities (example if your DB has it)
+with col6:
+    fatalities = filtered["fatalities"].sum() if "fatalities" in filtered else 0
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-value">{fatalities:,}</div>
+        <div class="metric-label">Fatalities</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Average Response Time (dummy logic, replace if you have a field)
+with col7:
+    avg_response = np.random.uniform(1,5)  # replace w/ real calc
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-value">{avg_response:.1f} days</div>
+        <div class="metric-label">Avg Response Time</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Reported Sources
+with col8:
+    reporters = filtered["source_name"].nunique()
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-value">{reporters}</div>
+        <div class="metric-label">Unique Sources</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Download button
 st.download_button(
@@ -544,6 +622,25 @@ if len(filtered) > 30:
     )
     
     st.plotly_chart(fig_forecast, use_container_width=True)
+    
+st.markdown('<div class="section-header">Top Dangerous Places</div>', unsafe_allow_html=True)
+
+if not filtered.empty:
+    danger_rank = (
+        filtered.groupby("location_text")
+        .agg(
+            incidents=("event_type", "count"),
+            avg_severity=("severity", "mean"),
+            critical=("severity", lambda x: (x>=4).sum())
+        )
+        .sort_values(["critical", "incidents"], ascending=[False, False])
+        .head(5)
+        .reset_index()
+    )
+    st.dataframe(danger_rank, use_container_width=True)
+else:
+    st.info("No data available for danger ranking.")
+
 
 # Interactive Map
 st.markdown('<div class="section-header">Crisis Map</div>', unsafe_allow_html=True)
