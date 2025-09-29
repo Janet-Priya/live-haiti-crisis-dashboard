@@ -1,0 +1,379 @@
+/* Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, .stApp {
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%) !important;
+    color: #e4e9f2 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* Hide Streamlit branding */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* Main Container */
+.main .block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+    max-width: 100% !important;
+}
+
+/* Header Styling */
+.main-header {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.main-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+
+.main-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    z-index: 1;
+}
+
+.main-header p {
+    color: #94a3b8;
+    font-size: 1rem;
+    font-weight: 400;
+    position: relative;
+    z-index: 1;
+}
+
+/* Section Headers */
+.section-header {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin: 2.5rem 0 1.5rem 0;
+    padding-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+    position: relative;
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+}
+
+/* Metric Cards */
+.metric-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.metric-card:hover {
+    border-color: rgba(99, 102, 241, 0.6);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.2);
+}
+
+.metric-card:hover::before {
+    opacity: 1;
+}
+
+.metric-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'SF Mono', 'Consolas', monospace;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+.metric-change {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+.metric-up {
+    color: #10b981;
+}
+
+.metric-down {
+    color: #ef4444;
+}
+
+/* Sidebar Styling */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+    border-right: 1px solid rgba(99, 102, 241, 0.2) !important;
+}
+
+section[data-testid="stSidebar"] > div {
+    background: transparent !important;
+    padding: 1.5rem !important;
+}
+
+/* Sidebar Headers */
+.stMarkdown h3, 
+section[data-testid="stSidebar"] h3 {
+    color: #f1f5f9 !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 1rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border-bottom: 2px solid rgba(99, 102, 241, 0.3) !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* Input Fields */
+div[data-baseweb="select"],
+.stMultiSelect > div,
+.stSelectbox > div {
+    background: rgba(30, 41, 59, 0.6) !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+div[data-baseweb="select"]:hover,
+.stMultiSelect > div:hover,
+.stSelectbox > div:hover {
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Multiselect tags */
+span[data-baseweb="tag"] {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 0.25rem 0.5rem !important;
+}
+
+/* Slider */
+.stSlider > div > div {
+    background: rgba(99, 102, 241, 0.2) !important;
+}
+
+.stSlider [role="slider"] {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+}
+
+.stSlider .st-bo {
+    color: #6366f1 !important;
+}
+
+/* Checkbox */
+.stCheckbox {
+    color: #e4e9f2 !important;
+}
+
+.stCheckbox input[type="checkbox"] {
+    accent-color: #6366f1 !important;
+}
+
+/* Date Input */
+.stDateInput > div {
+    background: rgba(30, 41, 59, 0.6) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 12px !important;
+}
+
+.stDateInput input {
+    color: #e4e9f2 !important;
+}
+
+/* Buttons */
+.stDownloadButton > button,
+.stButton > button {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 2rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3) !important;
+}
+
+.stDownloadButton > button:hover,
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4) !important;
+}
+
+/* Radio Buttons */
+.stRadio > div {
+    display: flex !important;
+    gap: 1rem !important;
+}
+
+.stRadio label {
+    background: rgba(30, 41, 59, 0.6) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 1.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.stRadio label:hover {
+    border-color: rgba(99, 102, 241, 0.6) !important;
+    background: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* DataFrames */
+.dataframe {
+    background: rgba(30, 41, 59, 0.6) !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    border-radius: 12px !important;
+}
+
+.dataframe th {
+    background: rgba(99, 102, 241, 0.2) !important;
+    color: #f1f5f9 !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.5px !important;
+}
+
+.dataframe td {
+    color: #e4e9f2 !important;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Plotly Charts - Enhanced Dark Theme */
+.js-plotly-plot {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    background: rgba(30, 41, 59, 0.4) !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+}
+
+/* Info/Warning/Error boxes */
+.stAlert {
+    background: rgba(30, 41, 59, 0.8) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 12px !important;
+    color: #e4e9f2 !important;
+}
+
+/* Expander */
+.streamlit-expanderHeader {
+    background: rgba(30, 41, 59, 0.6) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 12px !important;
+    color: #e4e9f2 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .metric-card {
+        height: 120px;
+    }
+    
+    .metric-value {
+        font-size: 1.75rem;
+    }
+}
