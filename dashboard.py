@@ -5,9 +5,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import numpy as np
+from pathlib import Path
 
 DB_PATH = "reports.db"
 
+# Page configuration
 st.set_page_config(
     page_title="Haiti Violence Analysis Dashboard",
     page_icon="🫂",
@@ -15,141 +17,19 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+# Load external CSS
+def load_css(file_path):
+    """Load CSS from external file"""
+    css_file = Path(file_path)
+    if css_file.exists():
+        with open(css_file) as f:
+            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    else:
+        st.warning(f"CSS file not found: {file_path}")
 
-    body, .stApp { 
-        background: #0d1117 !important; 
-        color: #e6edf3; 
-        font-family: 'Inter', sans-serif; 
-    }
+# Load the external CSS file
+load_css("style.css")
 
-    /* Header styling */
-    .main-header {
-        background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
-        border: 1px solid #30363d;
-        border-radius: 14px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    .main-header h1 { 
-        font-size: 2rem; 
-        font-weight: 700; 
-        margin-bottom: 0.25rem; 
-        color: #f0f6fc;
-    }
-    .main-header p { 
-        color: #8b949e; 
-        margin: 0;
-        font-size: 0.95rem;
-    }
-
-    /* Section titles */
-    .section-header { 
-        font-size: 0.9rem; 
-        font-weight: 600; 
-        color: #f0f6fc; 
-        margin: 2rem 0 1rem 0; 
-        padding-bottom: 0.5rem; 
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 1px solid #30363d;
-    }
-
-    /* Metric cards */
-    .metric-card { 
-        background: #161b22;
-        border: 1px solid #30363d; 
-        border-radius: 12px; 
-        padding: 1rem; 
-        text-align: center;
-        height: 130px; /* uniform height */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-        transition: all 0.2s ease-in-out;
-    }
-    .metric-card:hover {
-        border-color: #58a6ff;
-        transform: translateY(-2px);
-    }
-    .metric-value {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #58a6ff;
-        font-family: 'SF Mono', monospace;
-    }
-    .metric-label {
-        font-size: 0.75rem;
-        color: #8b949e;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .metric-change { font-size: 0.85rem; margin-top: 0.3rem; }
-    .metric-up { color: #3fb950; }
-    .metric-down { color: #f85149; }
-
-    /* Sidebar */
-    div[data-testid="stSidebarNav"] {
-        background: #0d1117;
-    }
-
-    /* Chart containers */
-    .chart-box {
-        margin-bottom: 1.5rem;
-    }
-/* Sidebar panel */
-    section[data-testid="stSidebar"] {
-        background-color: #161b22 !important;
-        padding: 1rem;
-    }
-/* Sidebar headers */
-    .css-1aumxhk, .stMarkdown h3 {
-        color: #f0f6fc !important;
-        font-size: 1rem !important;
-        font-weight: 600 !important;
-        margin-bottom: 0.5rem !important;
-        text-transform: uppercase;
-        border-bottom: 1px solid #30363d;
-        padding-bottom: 0.3rem;
-    }
-
-/* Multiselect dropdowns */
-    div[data-baseweb="select"] {
-        background-color: #21262d !important;
-        border-radius: 8px !important;
-        border: 1px solid #30363d !important;
-        color: #e6edf3 !important;
-    }
-    div[data-baseweb="select"]:hover {
-        border-color: #58a6ff !important;
-    }
-
-/* Slider */
-    .stSlider > div > div {
-        background: #30363d !important;
-    }
-    .stSlider .st-bo {
-        color: #58a6ff !important;
-    }
-/* Checkbox */
-    .stCheckbox input[type="checkbox"] {
-        accent-color: #f85149 !important;
-    }
-/* Date input */
-    .stDateInput > div {
-        background: #21262d !important;
-        border: 1px solid #30363d !important;
-        border-radius: 8px !important;
-    }
-    .stDateInput input {
-        color: #e6edf3 !important;
-    }
-</style>
-""", unsafe_allow_html=True)
 # Data loading
 @st.cache_data
 def load_crisis_data():
@@ -174,14 +54,14 @@ if df.empty:
 # Header
 st.markdown("""
 <div class="main-header">
-    <h1>Haiti Violence Analysis Dashboard</h1>
-    <p>Real-time conflict monitoring and predictive intelligence</p>
+    <h1>🌍 Haiti Violence Analysis Dashboard</h1>
+    <p>Real-time conflict monitoring and predictive intelligence system</p>
 </div>
 """, unsafe_allow_html=True)
 
 # Sidebar filters
 with st.sidebar:
-    st.markdown("### Filters")
+    st.markdown("### 🎛️ Filters")
     
     event_types = st.multiselect(
         "Event Type", 
@@ -242,11 +122,11 @@ prev_filtered = df[
     (pd.to_datetime(df["created_date"].fillna(df["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None) < start_date)
 ]
 
-st.markdown('<div class="section-header">Key Metrics</div>', unsafe_allow_html=True)
+# Key Metrics
+st.markdown('<div class="section-header">📊 Key Metrics</div>', unsafe_allow_html=True)
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
-# Total Incidents
 with col1:
     current_incidents = len(filtered)
     prev_incidents = len(prev_filtered)
@@ -261,7 +141,6 @@ with col1:
     </div>
     """, unsafe_allow_html=True)
 
-# Active Zones
 with col2:
     locations = filtered["location_text"].nunique()
     st.markdown(f"""
@@ -271,7 +150,6 @@ with col2:
     </div>
     """, unsafe_allow_html=True)
 
-# Avg Severity
 with col3:
     avg_severity = filtered["severity"].mean() if not filtered.empty else 0
     st.markdown(f"""
@@ -281,50 +159,47 @@ with col3:
     </div>
     """, unsafe_allow_html=True)
 
-# Critical Cases
 with col4:
     critical = len(filtered[filtered["severity"] >= 4])
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{critical}</div>
-        <div class="metric-label">Critical</div>
+        <div class="metric-label">Critical Cases</div>
     </div>
     """, unsafe_allow_html=True)
 
-# Sources
 with col5:
     sources = filtered["source_name"].nunique()
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{sources}</div>
-        <div class="metric-label">Sources</div>
+        <div class="metric-label">Data Sources</div>
     </div>
     """, unsafe_allow_html=True)
-# Extra Metrics Row
-st.markdown('<div class="section-header">Additional Insights</div>', unsafe_allow_html=True)
+
+# Additional Insights
+st.markdown('<div class="section-header">💡 Additional Insights</div>', unsafe_allow_html=True)
 col6, col7, col8 = st.columns(3)
 
-# Total Fatalities (example if your DB has it)
 with col6:
     fatalities = filtered["fatalities"].sum() if "fatalities" in filtered else 0
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{fatalities:,}</div>
-        <div class="metric-label">Fatalities</div>
+        <div class="metric-label">Total Fatalities</div>
     </div>
     """, unsafe_allow_html=True)
 
-# Average Response Time (dummy logic, replace if you have a field)
 with col7:
-    avg_response = np.random.uniform(1,5)  # replace w/ real calc
+    high_severity = len(filtered[filtered["severity"] >= 3])
+    pct_high = (high_severity / len(filtered) * 100) if len(filtered) > 0 else 0
     st.markdown(f"""
     <div class="metric-card">
-        <div class="metric-value">{avg_response:.1f} days</div>
-        <div class="metric-label">Avg Response Time</div>
+        <div class="metric-value">{pct_high:.1f}%</div>
+        <div class="metric-label">High Severity Rate</div>
     </div>
     """, unsafe_allow_html=True)
 
-# Reported Sources
 with col8:
     reporters = filtered["source_name"].nunique()
     st.markdown(f"""
@@ -336,19 +211,18 @@ with col8:
 
 # Download button
 st.download_button(
-    label="Download Filtered Data",
+    label="📥 Download Filtered Data",
     data=filtered.to_csv(index=False).encode("utf-8"),
     file_name=f"haiti_crisis_{datetime.now().strftime('%Y%m%d')}.csv",
     mime="text/csv"
 )
 
-# Incident Trends Over Time
-st.markdown('<div class="section-header">Incident Trends Over Time</div>', unsafe_allow_html=True)
+# Incident Trends
+st.markdown('<div class="section-header">📈 Incident Trends Over Time</div>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
-    # Monthly trend
     if 'created_date' in filtered.columns:
         filtered["month"] = pd.to_datetime(
             filtered["created_date"].fillna(filtered["timestamp"]),
@@ -363,28 +237,28 @@ with col1:
             y=monthly["count"],
             mode='lines+markers',
             name='Incidents',
-            line=dict(color='#58a6ff', width=3),
-            marker=dict(size=8, color='#58a6ff'),
+            line=dict(color='#6366f1', width=3),
+            marker=dict(size=10, color='#a855f7', line=dict(width=2, color='#6366f1')),
             fill='tozeroy',
-            fillcolor='rgba(88, 166, 255, 0.1)'
+            fillcolor='rgba(99, 102, 241, 0.2)'
         ))
         
         fig_monthly.update_layout(
             title="Monthly Incident Trends",
             xaxis_title="Month",
-            yaxis_title="Incidents",
+            yaxis_title="Number of Incidents",
             template="plotly_dark",
-            plot_bgcolor='#0d1117',
-            paper_bgcolor='#0d1117',
-            font=dict(color='#e6edf3', family='Inter'),
-            height=300,
-            margin=dict(l=50, r=20, t=40, b=50)
+            plot_bgcolor='rgba(15, 23, 42, 0.5)',
+            paper_bgcolor='rgba(30, 41, 59, 0.4)',
+            font=dict(color='#e4e9f2', family='Inter'),
+            height=350,
+            margin=dict(l=50, r=20, t=60, b=50),
+            hovermode='x unified'
         )
         
         st.plotly_chart(fig_monthly, use_container_width=True)
 
 with col2:
-    # Weekly trend
     if 'created_date' in filtered.columns:
         filtered["week"] = pd.to_datetime(
             filtered["created_date"].fillna(filtered["timestamp"]),
@@ -400,21 +274,24 @@ with col2:
             y=weekly["count"],
             marker=dict(
                 color=weekly["count"],
-                colorscale='Reds',
-                showscale=False
-            )
+                colorscale=[[0, '#6366f1'], [1, '#ef4444']],
+                showscale=False,
+                line=dict(width=0)
+            ),
+            text=weekly["count"],
+            textposition='outside'
         ))
         
         fig_weekly.update_layout(
             title="Weekly Incident Pattern (Last 8 Weeks)",
             xaxis_title="Week",
-            yaxis_title="Incidents",
+            yaxis_title="Number of Incidents",
             template="plotly_dark",
-            plot_bgcolor='#0d1117',
-            paper_bgcolor='#0d1117',
-            font=dict(color='#e6edf3', family='Inter'),
-            height=300,
-            margin=dict(l=50, r=20, t=40, b=50)
+            plot_bgcolor='rgba(15, 23, 42, 0.5)',
+            paper_bgcolor='rgba(30, 41, 59, 0.4)',
+            font=dict(color='#e4e9f2', family='Inter'),
+            height=350,
+            margin=dict(l=50, r=20, t=60, b=50)
         )
         
         st.plotly_chart(fig_weekly, use_container_width=True)
@@ -423,8 +300,7 @@ with col2:
 col1, col2 = st.columns(2)
 
 with col1:
-    # Top violence hotspots
-    st.markdown('<div class="section-header">Top Violence Hotspots</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">🔥 Top Violence Hotspots</div>', unsafe_allow_html=True)
     
     location_counts = filtered['location_text'].value_counts().head(5).reset_index()
     location_counts.columns = ['Location', 'Incidents']
@@ -436,7 +312,7 @@ with col1:
         orientation='h',
         marker=dict(
             color=location_counts['Incidents'],
-            colorscale='Reds',
+            colorscale=[[0, '#6366f1'], [1, '#ef4444']],
             showscale=False
         ),
         text=location_counts['Incidents'],
@@ -445,19 +321,20 @@ with col1:
     
     fig_hotspots.update_layout(
         template="plotly_dark",
-        plot_bgcolor='#0d1117',
-        paper_bgcolor='#0d1117',
-        font=dict(color='#e6edf3', family='Inter'),
-        height=300,
-        margin=dict(l=150, r=20, t=20, b=50),
+        plot_bgcolor='rgba(15, 23, 42, 0.5)',
+        paper_bgcolor='rgba(30, 41, 59, 0.4)',
+        font=dict(color='#e4e9f2', family='Inter'),
+        height=350,
+        margin=dict(l=150, r=50, t=20, b=50),
         xaxis_title="Number of Incidents",
-        yaxis_title=""
+        yaxis_title="",
+        showlegend=False
     )
     
     st.plotly_chart(fig_hotspots, use_container_width=True)
     
-    # Daily incident heatmap
-    st.markdown('<div class="section-header">Daily Incident Heatmap</div>', unsafe_allow_html=True)
+    # Daily heatmap
+    st.markdown('<div class="section-header">🕒 Daily Incident Heatmap</div>', unsafe_allow_html=True)
     
     if 'created_date' in filtered.columns:
         filtered['day_of_week'] = pd.to_datetime(
@@ -473,7 +350,6 @@ with col1:
         heatmap_data = filtered.groupby(['day_of_week', 'hour']).size().reset_index(name='count')
         heatmap_pivot = heatmap_data.pivot(index='day_of_week', columns='hour', values='count').fillna(0)
         
-        # Reorder days
         day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         heatmap_pivot = heatmap_pivot.reindex([d for d in day_order if d in heatmap_pivot.index])
         
@@ -481,16 +357,17 @@ with col1:
             z=heatmap_pivot.values,
             x=heatmap_pivot.columns,
             y=heatmap_pivot.index,
-            colorscale='Reds',
-            showscale=True
+            colorscale=[[0, '#1e293b'], [0.5, '#6366f1'], [1, '#ef4444']],
+            showscale=True,
+            colorbar=dict(title="Count")
         ))
         
         fig_heatmap.update_layout(
             template="plotly_dark",
-            plot_bgcolor='#0d1117',
-            paper_bgcolor='#0d1117',
-            font=dict(color='#e6edf3', family='Inter'),
-            height=300,
+            plot_bgcolor='rgba(15, 23, 42, 0.5)',
+            paper_bgcolor='rgba(30, 41, 59, 0.4)',
+            font=dict(color='#e4e9f2', family='Inter'),
+            height=350,
             margin=dict(l=100, r=20, t=20, b=50),
             xaxis_title="Hour of Day",
             yaxis_title=""
@@ -499,8 +376,7 @@ with col1:
         st.plotly_chart(fig_heatmap, use_container_width=True)
 
 with col2:
-    # Incident severity distribution
-    st.markdown('<div class="section-header">Incident Severity Distribution</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">📊 Incident Severity Distribution</div>', unsafe_allow_html=True)
     
     severity_counts = filtered['severity'].value_counts().sort_index().reset_index()
     severity_counts.columns = ['Severity', 'Count']
@@ -510,120 +386,125 @@ with col2:
     fig_severity.add_trace(go.Pie(
         labels=severity_counts['Severity'],
         values=severity_counts['Count'],
-        hole=0.5,
-        marker=dict(colors=['#3fb950', '#58a6ff', '#f0883e', '#f85149', '#d73a49'])
+        hole=0.6,
+        marker=dict(colors=['#10b981', '#6366f1', '#f59e0b', '#ef4444', '#991b1b']),
+        textinfo='label+percent',
+        textfont=dict(size=12, color='white')
     ))
     
     fig_severity.update_layout(
         template="plotly_dark",
-        plot_bgcolor='#0d1117',
-        paper_bgcolor='#0d1117',
-        font=dict(color='#e6edf3', family='Inter'),
-        height=300,
+        plot_bgcolor='rgba(15, 23, 42, 0.5)',
+        paper_bgcolor='rgba(30, 41, 59, 0.4)',
+        font=dict(color='#e4e9f2', family='Inter'),
+        height=350,
         margin=dict(l=20, r=20, t=20, b=20),
-        showlegend=True
+        showlegend=True,
+        legend=dict(orientation="v", yanchor="middle", y=0.5, xanchor="left", x=1.1)
     )
     
     st.plotly_chart(fig_severity, use_container_width=True)
     
-    # Monthly growth index
-    st.markdown('<div class="section-header">Monthly Growth Index</div>', unsafe_allow_html=True)
+    # Monthly growth
+    st.markdown('<div class="section-header">📉 Monthly Growth Index</div>', unsafe_allow_html=True)
     
     if 'created_date' in filtered.columns:
         monthly_growth = filtered.groupby("month").size().reset_index(name="count")
         monthly_growth['growth'] = monthly_growth['count'].pct_change() * 100
         
+        colors = ['#10b981' if x < 0 else '#ef4444' for x in monthly_growth['growth']]
+        
         fig_growth = go.Figure()
         fig_growth.add_trace(go.Bar(
             x=monthly_growth["month"],
             y=monthly_growth["growth"],
-            marker=dict(
-                color=monthly_growth["growth"],
-                colorscale='RdYlGn_r',
-                showscale=False
-            )
+            marker=dict(color=colors),
+            text=monthly_growth["growth"].round(1),
+            texttemplate='%{text}%',
+            textposition='outside'
         ))
+        
+        fig_growth.add_hline(y=0, line_dash="dash", line_color="rgba(255,255,255,0.3)")
         
         fig_growth.update_layout(
             title="Month-over-Month Change (%)",
             template="plotly_dark",
-            plot_bgcolor='#0d1117',
-            paper_bgcolor='#0d1117',
-            font=dict(color='#e6edf3', family='Inter'),
-            height=300,
-            margin=dict(l=50, r=20, t=40, b=50),
+            plot_bgcolor='rgba(15, 23, 42, 0.5)',
+            paper_bgcolor='rgba(30, 41, 59, 0.4)',
+            font=dict(color='#e4e9f2', family='Inter'),
+            height=350,
+            margin=dict(l=50, r=20, t=60, b=50),
             xaxis_title="Month",
-            yaxis_title="Growth %"
+            yaxis_title="Growth Rate (%)"
         )
         
         st.plotly_chart(fig_growth, use_container_width=True)
 
 # Predictive Intelligence
-st.markdown('<div class="section-header">AI-Powered Incident Forecasting</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header">🤖 AI-Powered Incident Forecasting</div>', unsafe_allow_html=True)
 
 if len(filtered) > 30:
-    # Simple trend line for prediction
     filtered['days_since_start'] = (
         pd.to_datetime(filtered["created_date"].fillna(filtered["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None) - 
         pd.to_datetime(filtered["created_date"].fillna(filtered["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None).min()
     ).dt.days
     
     daily_counts = filtered.groupby('days_since_start').size().reset_index(name='count')
-    
-    # Simple moving average for prediction
     daily_counts['ma_7'] = daily_counts['count'].rolling(window=7, min_periods=1).mean()
     
-    # Extend prediction
     last_day = daily_counts['days_since_start'].max()
     future_days = pd.DataFrame({'days_since_start': range(last_day + 1, last_day + 31)})
-    future_days['ma_7'] = daily_counts['ma_7'].iloc[-1]  # Simple extension
+    future_days['ma_7'] = daily_counts['ma_7'].iloc[-1]
     
     fig_forecast = go.Figure()
     
-    # Historical data
     fig_forecast.add_trace(go.Scatter(
         x=daily_counts['days_since_start'],
         y=daily_counts['count'],
         mode='lines',
-        name='Actual',
-        line=dict(color='#58a6ff', width=2)
+        name='Actual Incidents',
+        line=dict(color='#6366f1', width=2),
+        opacity=0.6
     ))
     
-    # Moving average
     fig_forecast.add_trace(go.Scatter(
         x=daily_counts['days_since_start'],
         y=daily_counts['ma_7'],
         mode='lines',
-        name='7-day MA',
-        line=dict(color='#f0883e', width=2, dash='dash')
+        name='7-Day Moving Average',
+        line=dict(color='#a855f7', width=3)
     ))
     
-    # Forecast
     fig_forecast.add_trace(go.Scatter(
         x=future_days['days_since_start'],
         y=future_days['ma_7'],
         mode='lines',
-        name='Forecast',
-        line=dict(color='#f85149', width=2, dash='dot'),
+        name='30-Day Forecast',
+        line=dict(color='#ef4444', width=3, dash='dot'),
         fill='tonexty',
-        fillcolor='rgba(248, 81, 73, 0.1)'
+        fillcolor='rgba(239, 68, 68, 0.2)'
     ))
     
     fig_forecast.update_layout(
-        title="30-Day Incident Forecast",
-        xaxis_title="Days from Start",
+        title="Incident Forecast - Next 30 Days",
+        xaxis_title="Days from Data Start",
         yaxis_title="Daily Incidents",
         template="plotly_dark",
-        plot_bgcolor='#0d1117',
-        paper_bgcolor='#0d1117',
-        font=dict(color='#e6edf3', family='Inter'),
-        height=400,
-        margin=dict(l=50, r=20, t=40, b=50)
+        plot_bgcolor='rgba(15, 23, 42, 0.5)',
+        paper_bgcolor='rgba(30, 41, 59, 0.4)',
+        font=dict(color='#e4e9f2', family='Inter'),
+        height=450,
+        margin=dict(l=50, r=20, t=60, b=50),
+        hovermode='x unified',
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     
     st.plotly_chart(fig_forecast, use_container_width=True)
-    
-st.markdown('<div class="section-header">Top Dangerous Places</div>', unsafe_allow_html=True)
+else:
+    st.info("📊 Insufficient data for forecasting. Need at least 30 data points.")
+
+# Danger Ranking
+st.markdown('<div class="section-header">⚠️ Top Dangerous Locations</div>', unsafe_allow_html=True)
 
 if not filtered.empty:
     danger_rank = (
@@ -634,18 +515,29 @@ if not filtered.empty:
             critical=("severity", lambda x: (x>=4).sum())
         )
         .sort_values(["critical", "incidents"], ascending=[False, False])
-        .head(5)
+        .head(10)
         .reset_index()
     )
-    st.dataframe(danger_rank, use_container_width=True)
+    
+    danger_rank['avg_severity'] = danger_rank['avg_severity'].round(2)
+    danger_rank.columns = ['Location', 'Total Incidents', 'Avg Severity', 'Critical Cases']
+    
+    st.dataframe(
+        danger_rank,
+        use_container_width=True,
+        hide_index=True
+    )
 else:
     st.info("No data available for danger ranking.")
 
-
 # Interactive Map
-st.markdown('<div class="section-header">Crisis Map</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header">🗺️ Interactive Crisis Map</div>', unsafe_allow_html=True)
 
-map_mode = st.radio("Map Visualization", ["Bubble Map", "Density Heatmap"], horizontal=True)
+map_mode = st.radio(
+    "Map Visualization Type",
+    ["Bubble Map", "Density Heatmap"],
+    horizontal=True
+)
 
 if "location_coords" in filtered.columns:
     coords = filtered["location_coords"].dropna().str.split(",", expand=True)
@@ -664,17 +556,36 @@ if "location_coords" in filtered.columns:
                     color="severity",
                     size="severity",
                     hover_name="location_text",
-                    hover_data=["title", "source_name", "event_type"],
+                    hover_data={
+                        "title": True,
+                        "source_name": True,
+                        "event_type": True,
+                        "latitude": False,
+                        "longitude": False,
+                        "severity": True
+                    },
                     zoom=6.5,
-                    height=650,
-                    color_continuous_scale="Reds",
-                    range_color=[1, 5]
+                    height=700,
+                    color_continuous_scale=[[0, '#6366f1'], [0.5, '#f59e0b'], [1, '#ef4444']],
+                    range_color=[1, 5],
+                    labels={"severity": "Severity Level"}
                 )
                 
                 fig_map.update_layout(
                     mapbox_style="carto-darkmatter",
                     template="plotly_dark",
-                    margin=dict(l=0, r=0, t=0, b=0)
+                    margin=dict(l=0, r=0, t=0, b=0),
+                    coloraxis_colorbar=dict(
+                        title="Severity",
+                        thicknessmode="pixels",
+                        thickness=15,
+                        lenmode="pixels",
+                        len=300,
+                        yanchor="top",
+                        y=1,
+                        xanchor="left",
+                        x=0.01
+                    )
                 )
                 
                 st.plotly_chart(fig_map, use_container_width=True)
@@ -684,17 +595,43 @@ if "location_coords" in filtered.columns:
                     lat="latitude",
                     lon="longitude",
                     z="severity",
-                    radius=18,
+                    radius=20,
                     zoom=6.5,
-                    height=650,
+                    height=700,
                     mapbox_style="carto-darkmatter",
-                    color_continuous_scale="Reds"
+                    color_continuous_scale=[[0, '#1e293b'], [0.3, '#6366f1'], [0.7, '#f59e0b'], [1, '#ef4444']],
+                    labels={"severity": "Severity Density"}
                 )
                 
                 fig_heat.update_layout(
-                    margin=dict(l=0, r=0, t=0, b=0)
+                    margin=dict(l=0, r=0, t=0, b=0),
+                    coloraxis_colorbar=dict(
+                        title="Density",
+                        thicknessmode="pixels",
+                        thickness=15,
+                        lenmode="pixels",
+                        len=300,
+                        yanchor="top",
+                        y=1,
+                        xanchor="left",
+                        x=0.01
+                    )
                 )
                 
                 st.plotly_chart(fig_heat, use_container_width=True)
         else:
-            st.info("No geocoded incidents available for mapping.")
+            st.info("📍 No geocoded incidents available for mapping.")
+    else:
+        st.info("📍 Invalid coordinate data format.")
+else:
+    st.info("📍 Location coordinates not available in the dataset.")
+
+# Footer
+st.markdown("---")
+st.markdown("""
+<div style='text-align: center; color: #94a3b8; padding: 2rem 0;'>
+    <p> Haiti Violence Analysis Dashboard | Data updated in real-time</p>
+    <p> Main source: ReliefWeb </p>
+    <p style='font-size: 0.85rem; margin-top: 0.5rem;'>Built with Streamlit & Plotly | © 2024</p>
+</div>
+""", unsafe_allow_html=True)
