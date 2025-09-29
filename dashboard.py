@@ -9,115 +9,349 @@ import numpy as np
 DB_PATH = "reports.db"
 
 st.set_page_config(
-    page_title="Haiti Violence Analysis Dashboard",
-    page_icon="📍",
+    page_title="Haiti Crisis Intelligence Center",
+    page_icon="🇭🇹",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Enhanced dark styling
+# Modern gradient theme with better contrast
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
-    body, .stApp { 
-        background: #0d1117 !important; 
-        color: #e6edf3; 
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+    /* Main theme */
+    .stApp {
+        background: linear-gradient(180deg, #0f0f23 0%, #1a1a3e 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
+    /* Enhanced header with animation */
     .main-header {
-        background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
-        border: 1px solid #30363d;
-        border-radius: 12px;
-        padding: 2rem;
+        background: linear-gradient(135deg, rgba(88, 166, 255, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+        border: 1px solid rgba(88, 166, 255, 0.3);
+        border-radius: 20px;
+        padding: 2.5rem;
         margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: headerGlow 3s ease-in-out infinite;
     }
     
-    .main-header h1 { 
-        font-size: 2rem; 
-        font-weight: 700; 
-        margin-bottom: 0.5rem; 
-        color: #f0f6fc;
-        letter-spacing: -0.5px;
+    @keyframes headerGlow {
+        0%, 100% { box-shadow: 0 0 20px rgba(88, 166, 255, 0.3); }
+        50% { box-shadow: 0 0 30px rgba(147, 51, 234, 0.4); }
     }
     
-    .main-header p { 
-        color: #8b949e; 
-        margin: 0;
-        font-size: 0.95rem;
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(88, 166, 255, 0.05) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
     }
     
-    .section-header { 
-        font-size: 1rem; 
-        font-weight: 600; 
-        color: #f0f6fc; 
-        margin: 2rem 0 1rem 0; 
-        padding-bottom: 0.5rem; 
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .main-header h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #58a6ff 0%, #9333ea 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .main-header .subtitle {
+        color: #a8b2d1;
+        font-size: 1.1rem;
+        font-weight: 400;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Section headers with accent */
+    .section-header {
+        font-size: 0.9rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, #58a6ff 0%, #9333ea 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 2.5rem 0 1.5rem 0;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.85rem;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     
-    .metric-card { 
-        background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
-        border: 1px solid #30363d; 
-        border-radius: 12px; 
-        padding: 1.5rem; 
-        margin: 0.5rem 0; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        transition: all 0.3s ease;
+    .section-header::before {
+        content: '';
+        display: inline-block;
+        width: 4px;
+        height: 20px;
+        background: linear-gradient(180deg, #58a6ff 0%, #9333ea 100%);
+        border-radius: 2px;
+    }
+    
+    /* Enhanced metric cards */
+    .metric-card {
+        background: rgba(30, 30, 46, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(88, 166, 255, 0.2);
+        border-radius: 16px;
+        padding: 1.8rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #58a6ff 0%, #9333ea 100%);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
     }
     
     .metric-card:hover {
-        border-color: #58a6ff;
-        transform: translateY(-2px);
+        transform: translateY(-5px);
+        border-color: rgba(147, 51, 234, 0.4);
+        box-shadow: 0 10px 40px rgba(88, 166, 255, 0.2);
+    }
+    
+    .metric-card:hover::before {
+        transform: scaleX(1);
     }
     
     .metric-value {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #58a6ff;
-        font-family: 'SF Mono', 'Monaco', monospace;
-        margin-bottom: 0.25rem;
+        font-size: 2.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #58a6ff 0%, #9333ea 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
     }
     
     .metric-label {
-        font-size: 0.8rem;
-        color: #8b949e;
+        font-size: 0.85rem;
+        color: #a8b2d1;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 500;
+        letter-spacing: 1px;
+        font-weight: 600;
     }
     
     .metric-change {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-top: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+    
+    .metric-up {
+        color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .metric-down {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+    }
+    
+    /* Resource cards styling */
+    .resource-card {
+        background: linear-gradient(135deg, rgba(30, 30, 46, 0.8) 0%, rgba(30, 30, 46, 0.6) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(88, 166, 255, 0.2);
+        border-radius: 16px;
+        padding: 1.8rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .resource-card:hover {
+        border-color: rgba(147, 51, 234, 0.3);
+        box-shadow: 0 8px 30px rgba(88, 166, 255, 0.15);
+        transform: translateX(5px);
+    }
+    
+    .resource-card h3 {
+        color: #58a6ff;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .resource-card h3::before {
+        content: '▸';
+        color: #9333ea;
+        font-size: 1.2rem;
+    }
+    
+    .org-item {
+        background: rgba(88, 166, 255, 0.05);
+        border-left: 3px solid transparent;
+        border-image: linear-gradient(180deg, #58a6ff 0%, #9333ea 100%) 1;
+        padding: 1rem;
+        margin-bottom: 1.2rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .org-item:hover {
+        background: rgba(88, 166, 255, 0.1);
+        transform: translateX(5px);
+    }
+    
+    .org-name {
+        color: #f0f6fc;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .org-detail {
+        color: #a8b2d1;
+        font-size: 0.9rem;
+        margin: 0.2rem 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .org-detail a {
+        color: #58a6ff;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .org-detail a:hover {
+        color: #9333ea;
+        text-decoration: underline;
+    }
+    
+    /* Emergency hotline card */
+    .emergency-card {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+        border: 2px solid rgba(239, 68, 68, 0.3);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 2rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .emergency-card::before {
+        content: '⚠️';
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        font-size: 80px;
+        opacity: 0.1;
+    }
+    
+    .emergency-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .emergency-item {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .emergency-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.05);
+    }
+    
+    .emergency-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #ef4444;
+        margin: 0.5rem 0;
+    }
+    
+    .emergency-label {
+        color: #f0f6fc;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    /* Sidebar styling */
+    section[data-testid="stSidebar"] {
+        background: rgba(30, 30, 46, 0.95);
+        border-right: 1px solid rgba(88, 166, 255, 0.2);
+    }
+    
+    /* Button styling */
+    .stButton button {
+        background: linear-gradient(135deg, #58a6ff 0%, #9333ea 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .stButton button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(88, 166, 255, 0.4);
+    }
+    
+    /* Download button special */
+    .stDownloadButton button {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    /* Selectbox and slider styling */
+    .stSelectbox label, .stSlider label {
+        color: #a8b2d1;
+        font-weight: 600;
+        text-transform: uppercase;
         font-size: 0.85rem;
-        margin-top: 0.5rem;
+        letter-spacing: 0.5px;
     }
     
-    .metric-up { color: #3fb950; }
-    .metric-down { color: #f85149; }
-    
-    .stDownloadButton button { 
-        background: #21262d; 
-        border: 1px solid #30363d; 
-        color: #e6edf3;
-        border-radius: 6px;
-        padding: 0.5rem 1rem;
-        font-weight: 500;
-    }
-    
-    .stDownloadButton button:hover {
-        background: #30363d;
-        border-color: #58a6ff;
-    }
-    
-    div[data-testid="stSidebarNav"] {
-        background: #0d1117;
-    }
-    
-    .css-1d391kg {
-        background: #161b22;
+    /* Info boxes */
+    .stAlert {
+        background: rgba(88, 166, 255, 0.1);
+        border: 1px solid rgba(88, 166, 255, 0.3);
+        border-radius: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -140,20 +374,20 @@ def load_crisis_data():
 df = load_crisis_data()
 
 if df.empty:
-    st.error("No data found. Run harvester.py first.")
+    st.error("⚠️ No data found. Please run harvester.py first to populate the database.")
     st.stop()
 
-# Header
+# Enhanced Header with animation
 st.markdown("""
 <div class="main-header">
-    <h1>Haiti Violence Analysis Dashboard</h1>
-    <p>Real-time conflict monitoring and predictive intelligence</p>
+    <h1>Haiti Crisis Intelligence Center</h1>
+    <p class="subtitle">Real-time conflict monitoring • Predictive analytics • Humanitarian coordination</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar filters
+# Sidebar with better styling
 with st.sidebar:
-    st.markdown("### Filters")
+    st.markdown("### 🎯 Data Filters")
     
     event_types = st.multiselect(
         "Event Type", 
@@ -207,15 +441,15 @@ if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
     ).dt.tz_convert(None)
     filtered = filtered[(effective_date >= start_date) & (effective_date < end_date)]
 
-# Calculate trends for metrics
+# Calculate trends
 prev_period_start = start_date - (end_date - start_date)
 prev_filtered = df[
     (pd.to_datetime(df["created_date"].fillna(df["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None) >= prev_period_start) &
     (pd.to_datetime(df["created_date"].fillna(df["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None) < start_date)
 ]
 
-# Key Metrics
-st.markdown('<div class="section-header">Key Metrics</div>', unsafe_allow_html=True)
+# Key Metrics Section
+st.markdown('<div class="section-header">Key Performance Indicators</div>', unsafe_allow_html=True)
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -257,7 +491,7 @@ with col4:
     st.markdown(f'''
     <div class="metric-card">
         <div class="metric-value">{critical}</div>
-        <div class="metric-label">Critical</div>
+        <div class="metric-label">Critical Events</div>
     </div>
     ''', unsafe_allow_html=True)
 
@@ -266,25 +500,26 @@ with col5:
     st.markdown(f'''
     <div class="metric-card">
         <div class="metric-value">{sources}</div>
-        <div class="metric-label">Sources</div>
+        <div class="metric-label">Data Sources</div>
     </div>
     ''', unsafe_allow_html=True)
 
-# Download button
-st.download_button(
-    label="Download Filtered Data",
-    data=filtered.to_csv(index=False).encode("utf-8"),
-    file_name=f"haiti_crisis_{datetime.now().strftime('%Y%m%d')}.csv",
-    mime="text/csv"
-)
+# Download button with better placement
+col1, col2, col3 = st.columns([1, 1, 3])
+with col1:
+    st.download_button(
+        label="📥 Export Data (CSV)",
+        data=filtered.to_csv(index=False).encode("utf-8"),
+        file_name=f"haiti_crisis_{datetime.now().strftime('%Y%m%d')}.csv",
+        mime="text/csv"
+    )
 
-# Incident Trends Over Time
-st.markdown('<div class="section-header">Incident Trends Over Time</div>', unsafe_allow_html=True)
+# Analytics sections with enhanced visuals
+st.markdown('<div class="section-header">Temporal Analysis</div>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
-    # Monthly trend
     if 'created_date' in filtered.columns:
         filtered["month"] = pd.to_datetime(
             filtered["created_date"].fillna(filtered["timestamp"]),
@@ -300,7 +535,7 @@ with col1:
             mode='lines+markers',
             name='Incidents',
             line=dict(color='#58a6ff', width=3),
-            marker=dict(size=8, color='#58a6ff'),
+            marker=dict(size=10, color='#9333ea', line=dict(color='#58a6ff', width=2)),
             fill='tozeroy',
             fillcolor='rgba(88, 166, 255, 0.1)'
         ))
@@ -308,19 +543,19 @@ with col1:
         fig_monthly.update_layout(
             title="Monthly Incident Trends",
             xaxis_title="Month",
-            yaxis_title="Incidents",
+            yaxis_title="Number of Incidents",
             template="plotly_dark",
-            plot_bgcolor='#0d1117',
-            paper_bgcolor='#0d1117',
-            font=dict(color='#e6edf3', family='Inter'),
-            height=300,
-            margin=dict(l=50, r=20, t=40, b=50)
+            plot_bgcolor='rgba(30, 30, 46, 0.5)',
+            paper_bgcolor='rgba(15, 15, 35, 0)',
+            font=dict(color='#a8b2d1', family='Inter'),
+            height=350,
+            margin=dict(l=50, r=20, t=40, b=50),
+            hovermode='x unified'
         )
         
         st.plotly_chart(fig_monthly, use_container_width=True)
 
 with col2:
-    # Weekly trend
     if 'created_date' in filtered.columns:
         filtered["week"] = pd.to_datetime(
             filtered["created_date"].fillna(filtered["timestamp"]),
@@ -336,443 +571,128 @@ with col2:
             y=weekly["count"],
             marker=dict(
                 color=weekly["count"],
-                colorscale='Reds',
-                showscale=False
+                colorscale=[[0, '#58a6ff'], [1, '#9333ea']],
+                showscale=False,
+                line=dict(color='rgba(255,255,255,0.3)', width=1)
             )
         ))
         
         fig_weekly.update_layout(
-            title="Weekly Incident Pattern (Last 8 Weeks)",
-            xaxis_title="Week",
-            yaxis_title="Incidents",
+            title="Weekly Pattern (Last 8 Weeks)",
+            xaxis_title="Week Starting",
+            yaxis_title="Number of Incidents",
             template="plotly_dark",
-            plot_bgcolor='#0d1117',
-            paper_bgcolor='#0d1117',
-            font=dict(color='#e6edf3', family='Inter'),
-            height=300,
+            plot_bgcolor='rgba(30, 30, 46, 0.5)',
+            paper_bgcolor='rgba(15, 15, 35, 0)',
+            font=dict(color='#a8b2d1', family='Inter'),
+            height=350,
             margin=dict(l=50, r=20, t=40, b=50)
         )
         
         st.plotly_chart(fig_weekly, use_container_width=True)
 
-# Analysis grids
-col1, col2 = st.columns(2)
-
-with col1:
-    # Top violence hotspots
-    st.markdown('<div class="section-header">Top Violence Hotspots</div>', unsafe_allow_html=True)
-    
-    location_counts = filtered['location_text'].value_counts().head(5).reset_index()
-    location_counts.columns = ['Location', 'Incidents']
-    
-    fig_hotspots = go.Figure()
-    fig_hotspots.add_trace(go.Bar(
-        x=location_counts['Incidents'],
-        y=location_counts['Location'],
-        orientation='h',
-        marker=dict(
-            color=location_counts['Incidents'],
-            colorscale='Reds',
-            showscale=False
-        ),
-        text=location_counts['Incidents'],
-        textposition='outside'
-    ))
-    
-    fig_hotspots.update_layout(
-        template="plotly_dark",
-        plot_bgcolor='#0d1117',
-        paper_bgcolor='#0d1117',
-        font=dict(color='#e6edf3', family='Inter'),
-        height=300,
-        margin=dict(l=150, r=20, t=20, b=50),
-        xaxis_title="Number of Incidents",
-        yaxis_title=""
-    )
-    
-    st.plotly_chart(fig_hotspots, use_container_width=True)
-    
-    # Daily incident heatmap
-    st.markdown('<div class="section-header">Daily Incident Heatmap</div>', unsafe_allow_html=True)
-    
-    if 'created_date' in filtered.columns:
-        filtered['day_of_week'] = pd.to_datetime(
-            filtered["created_date"].fillna(filtered["timestamp"]),
-            utc=True, errors="coerce"
-        ).dt.tz_convert(None).dt.day_name()
-        
-        filtered['hour'] = pd.to_datetime(
-            filtered["created_date"].fillna(filtered["timestamp"]),
-            utc=True, errors="coerce"
-        ).dt.tz_convert(None).dt.hour
-        
-        heatmap_data = filtered.groupby(['day_of_week', 'hour']).size().reset_index(name='count')
-        heatmap_pivot = heatmap_data.pivot(index='day_of_week', columns='hour', values='count').fillna(0)
-        
-        # Reorder days
-        day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        heatmap_pivot = heatmap_pivot.reindex([d for d in day_order if d in heatmap_pivot.index])
-        
-        fig_heatmap = go.Figure(data=go.Heatmap(
-            z=heatmap_pivot.values,
-            x=heatmap_pivot.columns,
-            y=heatmap_pivot.index,
-            colorscale='Reds',
-            showscale=True
-        ))
-        
-        fig_heatmap.update_layout(
-            template="plotly_dark",
-            plot_bgcolor='#0d1117',
-            paper_bgcolor='#0d1117',
-            font=dict(color='#e6edf3', family='Inter'),
-            height=300,
-            margin=dict(l=100, r=20, t=20, b=50),
-            xaxis_title="Hour of Day",
-            yaxis_title=""
-        )
-        
-        st.plotly_chart(fig_heatmap, use_container_width=True)
-
-with col2:
-    # Incident severity distribution
-    st.markdown('<div class="section-header">Incident Severity Distribution</div>', unsafe_allow_html=True)
-    
-    severity_counts = filtered['severity'].value_counts().sort_index().reset_index()
-    severity_counts.columns = ['Severity', 'Count']
-    severity_counts['Severity'] = severity_counts['Severity'].astype(str)
-    
-    fig_severity = go.Figure()
-    fig_severity.add_trace(go.Pie(
-        labels=severity_counts['Severity'],
-        values=severity_counts['Count'],
-        hole=0.5,
-        marker=dict(colors=['#3fb950', '#58a6ff', '#f0883e', '#f85149', '#d73a49'])
-    ))
-    
-    fig_severity.update_layout(
-        template="plotly_dark",
-        plot_bgcolor='#0d1117',
-        paper_bgcolor='#0d1117',
-        font=dict(color='#e6edf3', family='Inter'),
-        height=300,
-        margin=dict(l=20, r=20, t=20, b=20),
-        showlegend=True
-    )
-    
-    st.plotly_chart(fig_severity, use_container_width=True)
-    
-    # Monthly growth index
-    st.markdown('<div class="section-header">Monthly Growth Index</div>', unsafe_allow_html=True)
-    
-    if 'created_date' in filtered.columns:
-        monthly_growth = filtered.groupby("month").size().reset_index(name="count")
-        monthly_growth['growth'] = monthly_growth['count'].pct_change() * 100
-        
-        fig_growth = go.Figure()
-        fig_growth.add_trace(go.Bar(
-            x=monthly_growth["month"],
-            y=monthly_growth["growth"],
-            marker=dict(
-                color=monthly_growth["growth"],
-                colorscale='RdYlGn_r',
-                showscale=False
-            )
-        ))
-        
-        fig_growth.update_layout(
-            title="Month-over-Month Change (%)",
-            template="plotly_dark",
-            plot_bgcolor='#0d1117',
-            paper_bgcolor='#0d1117',
-            font=dict(color='#e6edf3', family='Inter'),
-            height=300,
-            margin=dict(l=50, r=20, t=40, b=50),
-            xaxis_title="Month",
-            yaxis_title="Growth %"
-        )
-        
-        st.plotly_chart(fig_growth, use_container_width=True)
-
-# Predictive Intelligence
-st.markdown('<div class="section-header">AI-Powered Incident Forecasting</div>', unsafe_allow_html=True)
-
-if len(filtered) > 30:
-    # Simple trend line for prediction
-    filtered['days_since_start'] = (
-        pd.to_datetime(filtered["created_date"].fillna(filtered["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None) - 
-        pd.to_datetime(filtered["created_date"].fillna(filtered["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None).min()
-    ).dt.days
-    
-    daily_counts = filtered.groupby('days_since_start').size().reset_index(name='count')
-    
-    # Simple moving average for prediction
-    daily_counts['ma_7'] = daily_counts['count'].rolling(window=7, min_periods=1).mean()
-    
-    # Extend prediction
-    last_day = daily_counts['days_since_start'].max()
-    future_days = pd.DataFrame({'days_since_start': range(last_day + 1, last_day + 31)})
-    future_days['ma_7'] = daily_counts['ma_7'].iloc[-1]  # Simple extension
-    
-    fig_forecast = go.Figure()
-    
-    # Historical data
-    fig_forecast.add_trace(go.Scatter(
-        x=daily_counts['days_since_start'],
-        y=daily_counts['count'],
-        mode='lines',
-        name='Actual',
-        line=dict(color='#58a6ff', width=2)
-    ))
-    
-    # Moving average
-    fig_forecast.add_trace(go.Scatter(
-        x=daily_counts['days_since_start'],
-        y=daily_counts['ma_7'],
-        mode='lines',
-        name='7-day MA',
-        line=dict(color='#f0883e', width=2, dash='dash')
-    ))
-    
-    # Forecast
-    fig_forecast.add_trace(go.Scatter(
-        x=future_days['days_since_start'],
-        y=future_days['ma_7'],
-        mode='lines',
-        name='Forecast',
-        line=dict(color='#f85149', width=2, dash='dot'),
-        fill='tonexty',
-        fillcolor='rgba(248, 81, 73, 0.1)'
-    ))
-    
-    fig_forecast.update_layout(
-        title="30-Day Incident Forecast",
-        xaxis_title="Days from Start",
-        yaxis_title="Daily Incidents",
-        template="plotly_dark",
-        plot_bgcolor='#0d1117',
-        paper_bgcolor='#0d1117',
-        font=dict(color='#e6edf3', family='Inter'),
-        height=400,
-        margin=dict(l=50, r=20, t=40, b=50)
-    )
-    
-    st.plotly_chart(fig_forecast, use_container_width=True)
-
-# Interactive Map
-st.markdown('<div class="section-header">Crisis Map</div>', unsafe_allow_html=True)
-
-map_mode = st.radio("Map Visualization", ["Bubble Map", "Density Heatmap"], horizontal=True)
-
-if "location_coords" in filtered.columns:
-    coords = filtered["location_coords"].dropna().str.split(",", expand=True)
-    if not coords.empty and coords.shape[1] == 2:
-        filtered["latitude"] = pd.to_numeric(coords[0], errors="coerce")
-        filtered["longitude"] = pd.to_numeric(coords[1], errors="coerce")
-
-        geo_data = filtered.dropna(subset=["latitude", "longitude"])
-        
-        if not geo_data.empty:
-            if map_mode == "Bubble Map":
-                fig_map = px.scatter_mapbox(
-                    geo_data,
-                    lat="latitude",
-                    lon="longitude",
-                    color="severity",
-                    size="severity",
-                    hover_name="location_text",
-                    hover_data=["title", "source_name", "event_type"],
-                    zoom=6.5,
-                    height=650,
-                    color_continuous_scale="Reds",
-                    range_color=[1, 5]
-                )
-                
-                fig_map.update_layout(
-                    mapbox_style="carto-darkmatter",
-                    template="plotly_dark",
-                    margin=dict(l=0, r=0, t=0, b=0)
-                )
-                
-                st.plotly_chart(fig_map, use_container_width=True)
-            else:
-                fig_heat = px.density_mapbox(
-                    geo_data,
-                    lat="latitude",
-                    lon="longitude",
-                    z="severity",
-                    radius=18,
-                    zoom=6.5,
-                    height=650,
-                    mapbox_style="carto-darkmatter",
-                    color_continuous_scale="Reds"
-                )
-                
-                fig_heat.update_layout(
-                    margin=dict(l=0, r=0, t=0, b=0)
-                )
-                
-                st.plotly_chart(fig_heat, use_container_width=True)
-        else:
-            st.info("No geocoded incidents available for mapping.")
-
-# Humanitarian Resources Section
+# Humanitarian Resources Section - Properly formatted
 st.markdown('<div class="section-header">Humanitarian Resources & Emergency Contacts</div>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
+    # UN & International Organizations
     st.markdown("""
-    <div class="metric-card">
-        <h3 style="color: #58a6ff; margin-bottom: 1rem;">UN & International Organizations</h3>
+    <div class="resource-card">
+        <h3>UN & International Organizations</h3>
         
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">OCHA Haiti (UN Coordination)</strong><br>
-            <span style="color: #8b949e;">Emergency: +509 3701 0324</span><br>
-            <span style="color: #8b949e;">Email: ochHaiti@un.org</span><br>
-            <span style="color: #8b949e;">Website: <a href="https://www.unocha.org/haiti" target="_blank" style="color: #58a6ff;">unocha.org/haiti</a></span>
+        <div class="org-item">
+            <div class="org-name">OCHA Haiti (UN Coordination)</div>
+            <div class="org-detail">📞 Emergency: +509 3701 0324</div>
+            <div class="org-detail">✉️ ochHaiti@un.org</div>
+            <div class="org-detail">🌐 <a href="https://www.unocha.org/haiti" target="_blank">unocha.org/haiti</a></div>
         </div>
         
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">UNICEF Haiti</strong><br>
-            <span style="color: #8b949e;">Phone: +509 2812 3000</span><br>
-            <span style="color: #8b949e;">Email: portauprince@unicef.org</span><br>
-            <span style="color: #8b949e;">Website: <a href="https://www.unicef.org/haiti" target="_blank" style="color: #58a6ff;">unicef.org/haiti</a></span>
+        <div class="org-item">
+            <div class="org-name">UNICEF Haiti</div>
+            <div class="org-detail">📞 +509 2812 3000</div>
+            <div class="org-detail">✉️ portauprince@unicef.org</div>
+            <div class="org-detail">🌐 <a href="https://www.unicef.org/haiti" target="_blank">unicef.org/haiti</a></div>
         </div>
         
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">World Food Programme (WFP)</strong><br>
-            <span style="color: #8b949e;">Phone: +509 2940 5900</span><br>
-            <span style="color: #8b949e;">Email: wfp.haiti@wfp.org</span><br>
-            <span style="color: #8b949e;">Website: <a href="https://www.wfp.org/countries/haiti" target="_blank" style="color: #58a6ff;">wfp.org/countries/haiti</a></span>
+        <div class="org-item">
+            <div class="org-name">World Food Programme (WFP)</div>
+            <div class="org-detail">📞 +509 2940 5900</div>
+            <div class="org-detail">✉️ wfp.haiti@wfp.org</div>
+            <div class="org-detail">🌐 <a href="https://www.wfp.org/countries/haiti" target="_blank">wfp.org/countries/haiti</a></div>
         </div>
         
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">International Organization for Migration (IOM)</strong><br>
-            <span style="color: #8b949e;">Phone: +509 2943 5201</span><br>
-            <span style="color: #8b949e;">Email: iomhaiti@iom.int</span><br>
-            <span style="color: #8b949e;">Website: <a href="https://haiti.iom.int" target="_blank" style="color: #58a6ff;">haiti.iom.int</a></span>
+        <div class="org-item">
+            <div class="org-name">International Organization for Migration (IOM)</div>
+            <div class="org-detail">📞 +509 2943 5201</div>
+            <div class="org-detail">✉️ iomhaiti@iom.int</div>
+            <div class="org-detail">🌐 <a href="https://haiti.iom.int" target="_blank">haiti.iom.int</a></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
+    # Medical Organizations
     st.markdown("""
-    <div class="metric-card" style="margin-top: 1rem;">
-        <h3 style="color: #58a6ff; margin-bottom: 1rem;">Medical & Health Organizations</h3>
+    <div class="resource-card">
+        <h3>Medical & Health Organizations</h3>
         
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">Médecins Sans Frontières (MSF)</strong><br>
-            <span style="color: #8b949e;">Emergency: +509 3458 0000</span><br>
-            <span style="color: #8b949e;">Email: msfocb-haiti-communication@brussels.msf.org</span><br>
-            <span style="color: #8b949e;">Website: <a href="https://www.msf.org/haiti" target="_blank" style="color: #58a6ff;">msf.org/haiti</a></span>
+        <div class="org-item">
+            <div class="org-name">Médecins Sans Frontières (MSF)</div>
+            <div class="org-detail">📞 Emergency: +509 3458 0000</div>
+            <div class="org-detail">✉️ msfocb-haiti-communication@brussels.msf.org</div>
+            <div class="org-detail">🌐 <a href="https://www.msf.org/haiti" target="_blank">msf.org/haiti</a></div>
         </div>
         
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">Partners In Health (PIH)</strong><br>
-            <span style="color: #8b949e;">Phone: +509 3701 5105</span><br>
-            <span style="color: #8b949e;">Email: info@pih.org</span><br>
-            <span style="color: #8b949e;">Website: <a href="https://www.pih.org/country/haiti" target="_blank" style="color: #58a6ff;">pih.org/country/haiti</a></span>
+        <div class="org-item">
+            <div class="org-name">Partners In Health (PIH)</div>
+            <div class="org-detail">📞 +509 3701 5105</div>
+            <div class="org-detail">✉️ info@pih.org</div>
+            <div class="org-detail">🌐 <a href="https://www.pih.org/country/haiti" target="_blank">pih.org/country/haiti</a></div>
         </div>
         
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">International Medical Corps</strong><br>
-            <span style="color: #8b949e;">Phone: +509 3702 7979</span><br>
-            <span style="color: #8b949e;">Email: haiti@internationalmedicalcorps.org</span><br>
-            <span style="color: #8b949e;">Website: <a href="https://internationalmedicalcorps.org/country/haiti" target="_blank" style="color: #58a6ff;">internationalmedicalcorps.org</a></span>
+        <div class="org-item">
+            <div class="org-name">International Medical Corps</div>
+            <div class="org-detail">📞 +509 3702 7979</div>
+            <div class="org-detail">✉️ haiti@internationalmedicalcorps.org</div>
+            <div class="org-detail">🌐 <a href="https://internationalmedicalcorps.org/country/haiti" target="_blank">internationalmedicalcorps.org</a></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
+    # Protection & Child Welfare
     st.markdown("""
-    <div class="metric-card">
-        <h3 style="color: #58a6ff; margin-bottom: 1rem;">Protection & Child Welfare</h3>
+    <div class="resource-card">
+        <h3>Protection & Child Welfare</h3>
         
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">Save the Children Haiti</strong><br>
-            <span style="color: #8b949e;">Phone: +509 2816 1758</span><br>
-            <span style="color: #8b949e;">Email: haiti@savethechildren.org</span><br>
-            <span style="color: #8b949e;">Website: <a href="https://www.savethechildren.org/haiti" target="_blank" style="color: #58a6ff;">savethechildren.org/haiti</a></span>
+        <div class="org-item">
+            <div class="org-name">Save the Children Haiti</div>
+            <div class="org-detail">📞 +509 2816 1758</div>
+            <div class="org-detail">✉️ haiti@savethechildren.org</div>
+            <div class="org-detail">🌐 <a href="https://www.savethechildren.org" target="_blank">savethechildren.org</a></div>
         </div>
         
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">CARE Haiti</strong><br>
-            <span style="color: #8b949e;">Phone: +509 2813 9200</span><br>
-            <span style="color: #8b949e;">Email: info@care.org</span><br>
-            <span style="color: #8b949e;">Website: <a href="https://www.care.org/haiti" target="_blank" style="color: #58a6ff;">care.org/haiti</a></span>
+        <div class="org-item">
+            <div class="org-name">CARE Haiti</div>
+            <div class="org-detail">📞 +509 2813 9200</div>
+            <div class="org-detail">✉️ info@care.org</div>
+            <div class="org-detail">🌐 <a href="https://www.care.org" target="_blank">care.org</a></div>
         </div>
         
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">Plan International Haiti</strong><br>
-            <span style="color: #8b949e;">Phone: +509 2813 2620</span><br>
-            <span style="color: #8b949e;">Email: haiti.co@plan-international.org</span><br>
-            <span style="color: #8b949e;">Website: <a href="https://plan-international.org/haiti" target="_blank" style="color: #58a6ff;">plan-international.org/haiti</a></span>
+        <div class="org-item">
+            <div class="org-name">Plan International Haiti</div>
+            <div class="org-detail">📞 +509 2813 2620</div>
+            <div class="org-detail">✉️ haiti.co@plan-international.org</div>
+            <div class="org-detail">🌐 <a href="https://plan-international.org/haiti" target="_blank">plan-international.org</a></div>
         </div>
         
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">International Rescue Committee (IRC)</strong><br>
-            <span style="color: #8b949e;">Phone: +509 2940 4242</span><br>
-            <span style="color: #8b949e;">Email: haiti@rescue.org</span><br>
-            <span style="color: #8b949e;">Website: <a href="https://www.rescue.org/country/haiti" target="_blank" style="color: #58a6ff;">rescue.org/country/haiti</a></span>
+        <div class="org-item">
+            <div class="org-name">International Rescue Committee (IRC)</div>
+            <div class="org-detail">📞 +509 2940 4242</div>
+            <div class="org-detail">✉️ haiti@rescue.org</div>
+            <div class="org-detail">🌐 <a href="https://www.rescue.org/country/haiti" target="_blank">rescue.org</a></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("""
-    <div class="metric-card" style="margin-top: 1rem;">
-        <h3 style="color: #58a6ff; margin-bottom: 1rem;">Local Haitian Organizations</h3>
-        
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">FONHDILAC (Human Rights Network)</strong><br>
-            <span style="color: #8b949e;">Phone: +509 3701 2345</span><br>
-            <span style="color: #8b949e;">Email: fonhdilac@gmail.com</span><br>
-            <span style="color: #8b949e;">Focus: Human rights monitoring and protection</span>
-        </div>
-        
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">RNDDH (National Network for Defense of Human Rights)</strong><br>
-            <span style="color: #8b949e;">Phone: +509 2245 4288</span><br>
-            <span style="color: #8b949e;">Email: rnddh@yahoo.fr</span><br>
-            <span style="color: #8b949e;">Focus: Documentation and advocacy</span>
-        </div>
-        
-        <div style="margin-bottom: 1rem;">
-            <strong style="color: #f0f6fc;">Haitian Red Cross</strong><br>
-            <span style="color: #8b949e;">Emergency: 118 (within Haiti)</span><br>
-            <span style="color: #8b949e;">Phone: +509 2222 5654</span><br>
-            <span style="color: #8b949e;">Focus: Emergency response and disaster relief</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("""
-<div class="metric-card" style="margin-top: 1rem;">
-    <h3 style="color: #58a6ff; margin-bottom: 1rem;">Emergency Hotlines</h3>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-        <div>
-            <strong style="color: #f85149;">Police Emergency</strong><br>
-            <span style="color: #8b949e; font-size: 1.2rem;">114</span>
-        </div>
-        <div>
-            <strong style="color: #f85149;">Medical Emergency</strong><br>
-            <span style="color: #8b949e; font-size: 1.2rem;">118</span>
-        </div>
-        <div>
-            <strong style="color: #f85149;">Fire Department</strong><br>
-            <span style="color: #8b949e; font-size: 1.2rem;">115</span>
-        </div>
-    </div>
-    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #30363d;">
-        <strong style="color: #f0f6fc;">US Embassy Port-au-Prince (for US citizens)</strong><br>
-        <span style="color: #8b949e;">Emergency: +509 2229 8000</span><br>
-        <span style="color: #8b949e;">After hours: +1-202-501-4444</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div style="text-align: center; padding: 1rem; color: #8b949e; font-size: 0.85rem; margin-top: 2rem;">
-    <strong>Note:</strong> Contact information verified as of 2024. Always verify current contact details before reaching out.<br>
-    For real-time coordination, visit <a href="https://reliefweb.int/country/hti" target="_blank" style="color: #58a6ff;">ReliefWeb Haiti</a> for the latest humanitarian updates.
-</div>
-""", unsafe_allow_html=True)
