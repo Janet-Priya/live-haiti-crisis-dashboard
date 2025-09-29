@@ -1,8 +1,8 @@
 import sqlite3
-
+# Access columns by name
 def get_db_connection():
     conn = sqlite3.connect('reports.db')
-    conn.row_factory = sqlite3.Row  # Access columns by name
+    conn.row_factory = sqlite3.Row  
     return conn
 
 def create_reports_table():
