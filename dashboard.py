@@ -55,7 +55,7 @@ if df.empty:
 st.markdown("""
 <div class="main-header">
     <h1> Haiti Violence Analysis Dashboard</h1>
-    <p>Real-time conflict monitoring and predictive intelligence system</p>
+    <p>Real-time conflict monitoring system in Haiti</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -211,7 +211,7 @@ with col8:
 
 # Download button
 st.download_button(
-    label= Download Filtered Data",
+    label= "Download Filtered Data",
     data=filtered.to_csv(index=False).encode("utf-8"),
     file_name=f"haiti_crisis_{datetime.now().strftime('%Y%m%d')}.csv",
     mime="text/csv"
