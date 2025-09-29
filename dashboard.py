@@ -10,7 +10,7 @@ DB_PATH = "reports.db"
 
 st.set_page_config(
     page_title="Haiti Violence Analysis Dashboard",
-    page_icon="📍",
+    page_icon="🫂",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -351,7 +351,7 @@ with col2:
             font=dict(color='#e6edf3', family='Inter'),
             height=300,
             margin=dict(l=50, r=20, t=40, b=50)
-        ))
+        )
         
         st.plotly_chart(fig_weekly, use_container_width=True)
 
