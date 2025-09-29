@@ -54,14 +54,14 @@ if df.empty:
 # Header
 st.markdown("""
 <div class="main-header">
-    <h1>🌍 Haiti Violence Analysis Dashboard</h1>
+    <h1> Haiti Violence Analysis Dashboard</h1>
     <p>Real-time conflict monitoring and predictive intelligence system</p>
 </div>
 """, unsafe_allow_html=True)
 
 # Sidebar filters
 with st.sidebar:
-    st.markdown("### 🎛️ Filters")
+    st.markdown("### Filters")
     
     event_types = st.multiselect(
         "Event Type", 
@@ -123,7 +123,7 @@ prev_filtered = df[
 ]
 
 # Key Metrics
-st.markdown('<div class="section-header">📊 Key Metrics</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header">Key Metrics</div>', unsafe_allow_html=True)
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -178,7 +178,7 @@ with col5:
     """, unsafe_allow_html=True)
 
 # Additional Insights
-st.markdown('<div class="section-header">💡 Additional Insights</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header"> Additional Insights</div>', unsafe_allow_html=True)
 col6, col7, col8 = st.columns(3)
 
 with col6:
@@ -211,14 +211,14 @@ with col8:
 
 # Download button
 st.download_button(
-    label="📥 Download Filtered Data",
+    label= Download Filtered Data",
     data=filtered.to_csv(index=False).encode("utf-8"),
     file_name=f"haiti_crisis_{datetime.now().strftime('%Y%m%d')}.csv",
     mime="text/csv"
 )
 
 # Incident Trends
-st.markdown('<div class="section-header">📈 Incident Trends Over Time</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header">Incident Trends Over Time</div>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
@@ -300,7 +300,7 @@ with col2:
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown('<div class="section-header">🔥 Top Violence Hotspots</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Top Violence Hotspots</div>', unsafe_allow_html=True)
     
     location_counts = filtered['location_text'].value_counts().head(5).reset_index()
     location_counts.columns = ['Location', 'Incidents']
@@ -334,7 +334,7 @@ with col1:
     st.plotly_chart(fig_hotspots, use_container_width=True)
     
     # Daily heatmap
-    st.markdown('<div class="section-header">🕒 Daily Incident Heatmap</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Daily Incident Heatmap</div>', unsafe_allow_html=True)
     
     if 'created_date' in filtered.columns:
         filtered['day_of_week'] = pd.to_datetime(
@@ -376,7 +376,7 @@ with col1:
         st.plotly_chart(fig_heatmap, use_container_width=True)
 
 with col2:
-    st.markdown('<div class="section-header">📊 Incident Severity Distribution</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Incident Severity Distribution</div>', unsafe_allow_html=True)
     
     severity_counts = filtered['severity'].value_counts().sort_index().reset_index()
     severity_counts.columns = ['Severity', 'Count']
@@ -406,7 +406,7 @@ with col2:
     st.plotly_chart(fig_severity, use_container_width=True)
     
     # Monthly growth
-    st.markdown('<div class="section-header">📉 Monthly Growth Index</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Monthly Growth Index</div>', unsafe_allow_html=True)
     
     if 'created_date' in filtered.columns:
         monthly_growth = filtered.groupby("month").size().reset_index(name="count")
@@ -441,7 +441,7 @@ with col2:
         st.plotly_chart(fig_growth, use_container_width=True)
 
 # Predictive Intelligence
-st.markdown('<div class="section-header">🤖 AI-Powered Incident Forecasting</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header"> AI-Powered Incident Forecasting</div>', unsafe_allow_html=True)
 
 if len(filtered) > 30:
     filtered['days_since_start'] = (
@@ -504,7 +504,7 @@ else:
     st.info("📊 Insufficient data for forecasting. Need at least 30 data points.")
 
 # Danger Ranking
-st.markdown('<div class="section-header">⚠️ Top Dangerous Locations</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header"> Top Dangerous Locations</div>', unsafe_allow_html=True)
 
 if not filtered.empty:
     danger_rank = (
@@ -531,7 +531,7 @@ else:
     st.info("No data available for danger ranking.")
 
 # Interactive Map
-st.markdown('<div class="section-header">🗺️ Interactive Crisis Map</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header"> Interactive Crisis Map</div>', unsafe_allow_html=True)
 
 map_mode = st.radio(
     "Map Visualization Type",
@@ -620,18 +620,18 @@ if "location_coords" in filtered.columns:
                 
                 st.plotly_chart(fig_heat, use_container_width=True)
         else:
-            st.info("📍 No geocoded incidents available for mapping.")
+            st.info(" No geocoded incidents available for mapping.")
     else:
-        st.info("📍 Invalid coordinate data format.")
+        st.info(" Invalid coordinate data format.")
 else:
-    st.info("📍 Location coordinates not available in the dataset.")
+    st.info("Location coordinates not available in the dataset.")
 
 # Footer
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #94a3b8; padding: 2rem 0;'>
-    <p>🌍 Haiti Violence Analysis Dashboard | Data updated in real-time</p>
-    <p>📊 Main source: ReliefWeb</p>
+    <p> Haiti Violence Analysis Dashboard | Data updated in real-time</p>
+    <p> Main source: ReliefWeb</p>
     <p style='font-size: 0.85rem; margin-top: 0.5rem;'>Built with Streamlit & Plotly | © 2024</p>
 </div>
 """, unsafe_allow_html=True)
