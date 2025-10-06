@@ -644,6 +644,7 @@ else:
 st.markdown('<div class="section-header">✵ Interactive Crisis Map</div>', unsafe_allow_html=True)
 
 map_mode = st.radio(
+    "Map Visualization Type",
     ["Bubble Map", "Density Heatmap"],
     horizontal=True
 )
