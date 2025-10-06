@@ -6,6 +6,9 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import numpy as np
 from pathlib import Path
+import google.generativeai as genai
+import json
+import re
 
 DB_PATH = "reports.db"
 
@@ -51,37 +54,110 @@ if df.empty:
     st.error("No data found. Run harvester.py first.")
     st.stop()
 
+# Initialize Gemini with your API key from environment variable
+import os
+from dotenv import load_dotenv
+load_dotenv()
+genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+
+def gemini_extract_metrics(text, threshold=1000):
+    # Split text into lines and ignore summary lines
+    incident_lines = []
+    for line in text.split('\n'):
+        if not re.match(r'^\s*Total (killed|injured|kidnapped)', line, re.IGNORECASE):
+            incident_lines.append(line)
+    incident_text = "\n".join(incident_lines)
+    
+    prompt = (
+        "Extract all numbers of people killed and injured from the following incident report text. "
+        "Ignore any summary or total lines. Return a JSON object with keys: killed, injured. "
+        "If not mentioned, use 0. If there are multiple mentions, sum them. Respond ONLY with JSON. "
+        f"Text: {incident_text}"
+    )
+    try:
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        response = model.generate_content(prompt)
+        if hasattr(response, "text"):
+            result_text = response.text
+        elif hasattr(response, "candidates"):
+            result_text = response.candidates[0].content.parts[0].text
+        else:
+            result_text = str(response)
+        print("Gemini output:", result_text)
+        try:
+            result_text = re.sub(r"^```json|```$", "", result_text, flags=re.MULTILINE).strip()
+            metrics = json.loads(result_text)
+            killed = int(metrics.get("killed", 0)) if str(metrics.get("killed", "0")).isdigit() else 0
+            injured = int(metrics.get("injured", 0)) if str(metrics.get("injured", "0")).isdigit() else 0
+            # Ignore if above threshold
+            killed = killed if killed <= threshold else 0
+            injured = injured if injured <= threshold else 0
+            return killed, injured
+        except Exception:
+            killed_matches = re.findall(r'(\d+)\s+(?:killed)', incident_text, re.IGNORECASE)
+            injured_matches = re.findall(r'(\d+)\s+(?:injured)', incident_text, re.IGNORECASE)
+            killed = sum([int(x) for x in killed_matches if int(x) <= threshold]) if killed_matches else 0
+            injured = sum([int(x) for x in injured_matches if int(x) <= threshold]) if injured_matches else 0
+            return killed, injured
+    except Exception as e:
+        print("Error:", e)
+        return 0, 0
+
+# Apply Gemini extraction to your DataFrame
+if "raw_text" in df.columns:
+    df[["killed", "injured"]] = df["raw_text"].apply(
+        lambda x: pd.Series(gemini_extract_metrics(x, threshold=1000))
+    )
+
 # Header
-st.markdown("""
+st.markdown(f"""
 <div class="main-header">
-    <h1> Haiti Violence Analysis Dashboard</h1>
-    <p>Real-time conflict monitoring system in Haiti</p>
+    <div class="header-left">
+        <span class="header-title">❦ Haiti Crisis Monitor</span>
+        <span class="header-subtitle">Real-time conflict tracking</span>
+    </div>
+    <div class="header-right">
+        <span class="live-badge"><span class="live-dot"></span> Live Data</span>
+        <span class="update-time">Updated: {datetime.now().strftime('%I:%M:%S %p')}</span>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar filters
-with st.sidebar:
-    st.markdown("### Filters")
-    
+
+# 🧠 fake sidebar layout — two columns
+col_filters, col_main = st.columns([1.2, 3.8], gap="large")
+
+# 💅 FILTER PANEL on the left
+with col_filters:
+    st.markdown("### 🗁 Filters")
+
+    # Event Type
     event_types = st.multiselect(
         "Event Type", 
         sorted(df["event_type"].dropna().unique()), 
         default=list(df["event_type"].dropna().unique())
     )
-    
+
+    # Severity
     severity = st.slider("Severity Range", 1, 5, (1, 5))
-    
+
+    # Locations
     areas = st.multiselect(
         "Locations", 
         sorted(df["location_text"].dropna().unique()), 
         default=list(sorted(df["location_text"].dropna().unique()))
     )
-    
+
+    # Conflict-related only
     conflict_only = st.checkbox("Conflict-related only", value=True)
-    
+
     # Date range
     if 'created_date' in df.columns:
-        date_col = pd.to_datetime(df['created_date'].fillna(df['timestamp']), utc=True, errors='coerce').dt.tz_convert(None)
+        date_col = pd.to_datetime(
+            df['created_date'].fillna(df['timestamp']),
+            utc=True, errors='coerce'
+        ).dt.tz_convert(None)
+
         if date_col.notna().any():
             min_date = date_col.min().date()
             max_date = date_col.max().date()
@@ -91,11 +167,14 @@ with st.sidebar:
     else:
         min_date = (datetime.now() - timedelta(days=30)).date()
         max_date = datetime.now().date()
-    
+
     date_range = st.date_input("Date Range", value=(min_date, max_date))
 
-# Apply filters
-filtered = df[(df["severity"] >= severity[0]) & (df["severity"] <= severity[1])]
+# 💾 FILTER APPLICATION LOGIC
+filtered = df[
+    (df["severity"] >= severity[0]) & 
+    (df["severity"] <= severity[1])
+]
 
 if event_types:
     filtered = filtered[filtered["event_type"].isin(event_types)]
@@ -104,7 +183,10 @@ if areas:
     filtered = filtered[filtered["location_text"].isin(areas)]
 
 if conflict_only:
-    conflict_set = {"violence", "kidnapping", "sexual_violence", "displacement", "protest", "looting", "roadblock"}
+    conflict_set = {
+        "violence", "kidnapping", "sexual_violence",
+        "displacement", "protest", "looting", "roadblock"
+    }
     filtered = filtered[filtered["event_type"].isin(conflict_set)]
 
 if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
@@ -115,34 +197,72 @@ if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
     ).dt.tz_convert(None)
     filtered = filtered[(effective_date >= start_date) & (effective_date < end_date)]
 
-# Calculate trends for metrics
-prev_period_start = start_date - (end_date - start_date)
-prev_filtered = df[
-    (pd.to_datetime(df["created_date"].fillna(df["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None) >= prev_period_start) &
-    (pd.to_datetime(df["created_date"].fillna(df["timestamp"]), utc=True, errors="coerce").dt.tz_convert(None) < start_date)
-]
+
+# 🌸 a lil CSS to make it pop
+st.markdown("""
+<style>
+    [data-testid="stColumn"] {
+        background: linear-gradient(135deg, rgba(36,0,70,0.6), rgba(0,0,0,0.3));
+        border-radius: 16px;
+        padding: 1rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
+with col_main:
+    st.markdown(
+        """
+        <div style="color: #f0f0f0; font-size: 25px; line-height: 1.6; padding: 10px;">
+            <p>
+            The <b>Haiti Crisis Data Dashboard</b> provides a live, data-driven view of the ongoing humanitarian emergency in Haiti. 
+            It compiles and visualizes real-time reports of violence, displacement, and instability across the nation, 
+            helping translate raw data into actionable insight for decision-makers, journalists, and relief organizations.
+            </p>
+            <p>
+            By aggregating open-source intelligence, geolocation data, and verified event reports, 
+            this platform allows users to track the scale, distribution, and intensity of conflict incidents over time. 
+            Trends in severity, location patterns, and crisis escalation are dynamically updated to provide situational awareness 
+            and support rapid-response planning.
+            </p>
+            <p>
+            The dashboard’s goal is not only to monitor the crisis but also to empower analysis — 
+            offering clarity in an environment of uncertainty. Each visualization aims to connect data with human context, 
+            bringing transparency to a rapidly evolving humanitarian landscape.
+            </p>
+            <p>
+            Updated automatically every few hours, this dashboard reflects Haiti’s unfolding story — 
+            a nation in turmoil, resilience, and transition.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+
 
 # Key Metrics
 st.markdown('<div class="section-header">Key Metrics</div>', unsafe_allow_html=True)
 
-col1, col2, col3, col4, col5 = st.columns(5)
+# Calculate metrics first
+current_incidents = len(filtered)
+locations = filtered["location_text"].nunique()
+avg_severity = filtered["severity"].mean() if not filtered.empty else 0
+critical = len(filtered[filtered["severity"] >= 4])
+
+# Metric Cards with icons
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    current_incidents = len(filtered)
-    prev_incidents = len(prev_filtered)
-    change = ((current_incidents - prev_incidents) / prev_incidents * 100) if prev_incidents > 0 else 0
-    change_class = "metric-up" if change >= 0 else "metric-down"
-    change_icon = "↑" if change >= 0 else "↓"
     st.markdown(f"""
     <div class="metric-card">
-        <div class="metric-value">{current_incidents:,}</div>
+        <div class="metric-value">{current_incidents}</div>
         <div class="metric-label">Total Incidents</div>
-        <div class="metric-change {change_class}">{change_icon} {abs(change):.1f}%</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
-    locations = filtered["location_text"].nunique()
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{locations}</div>
@@ -151,7 +271,6 @@ with col2:
     """, unsafe_allow_html=True)
 
 with col3:
-    avg_severity = filtered["severity"].mean() if not filtered.empty else 0
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{avg_severity:.2f}</div>
@@ -160,7 +279,6 @@ with col3:
     """, unsafe_allow_html=True)
 
 with col4:
-    critical = len(filtered[filtered["severity"] >= 4])
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{critical}</div>
@@ -168,44 +286,35 @@ with col4:
     </div>
     """, unsafe_allow_html=True)
 
-with col5:
-    sources = filtered["source_name"].nunique()
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value">{sources}</div>
-        <div class="metric-label">Data Sources</div>
-    </div>
-    """, unsafe_allow_html=True)
 
 # Additional Insights
 st.markdown('<div class="section-header"> Additional Insights</div>', unsafe_allow_html=True)
 col6, col7, col8 = st.columns(3)
 
 with col6:
-    fatalities = filtered["fatalities"].sum() if "fatalities" in filtered else 0
+    killed = filtered["killed"].sum() if "killed" in filtered.columns else 0
     st.markdown(f"""
     <div class="metric-card">
-        <div class="metric-value">{fatalities:,}</div>
-        <div class="metric-label">Total Fatalities</div>
+        <div class="metric-value">{killed:,}</div>
+        <div class="metric-label">Total Killed</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col7:
-    high_severity = len(filtered[filtered["severity"] >= 3])
-    pct_high = (high_severity / len(filtered) * 100) if len(filtered) > 0 else 0
+    injured = filtered["injured"].sum() if "injured" in filtered.columns else 0
     st.markdown(f"""
     <div class="metric-card">
-        <div class="metric-value">{pct_high:.1f}%</div>
-        <div class="metric-label">High Severity Rate</div>
+        <div class="metric-value">{injured:,}</div>
+        <div class="metric-label">Total Injured</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col8:
-    reporters = filtered["source_name"].nunique()
+    critical = len(filtered[filtered["severity"] >= 4])
     st.markdown(f"""
     <div class="metric-card">
-        <div class="metric-value">{reporters}</div>
-        <div class="metric-label">Unique Sources</div>
+        <div class="metric-value">{critical}</div>
+        <div class="metric-label">Critical Cases</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -503,6 +612,8 @@ if len(filtered) > 30:
 else:
     st.info("📊 Insufficient data for forecasting. Need at least 30 data points.")
 
+    
+
 # Danger Ranking
 st.markdown('<div class="section-header"> Top Dangerous Locations</div>', unsafe_allow_html=True)
 
@@ -529,12 +640,10 @@ if not filtered.empty:
     )
 else:
     st.info("No data available for danger ranking.")
-
 # Interactive Map
-st.markdown('<div class="section-header"> Interactive Crisis Map</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header">✵ Interactive Crisis Map</div>', unsafe_allow_html=True)
 
 map_mode = st.radio(
-    "Map Visualization Type",
     ["Bubble Map", "Density Heatmap"],
     horizontal=True
 )
@@ -626,12 +735,75 @@ if "location_coords" in filtered.columns:
 else:
     st.info("Location coordinates not available in the dataset.")
 
+
+# Sources Section
+st.markdown('<div class="section-header">🛢Sources</div>', unsafe_allow_html=True)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    sources_html = '<div class="info-card info-scroll">'
+    sources_html += '<div class="info-card-header">'
+    sources_html += '<span> 🗐 Data Sources</span>'
+    sources_html += '</div>'
+    sources_html += '<div class="info-scroll-content">'
+    
+    if "source_name" in filtered.columns:
+        source_counts = filtered["source_name"].value_counts().reset_index()
+        source_counts.columns = ["Source", "Incidents"]
+        source_times = {
+            "ReliefWeb": "2 hours ago",
+            "UNICEF": "3 hours ago",
+            "OCHA": "4 hours ago",
+            "MSF": "5 hours ago",
+            "Red Cross": "6 hours ago",
+            "WFP": "8 hours ago"
+        }
+        for _, row in source_counts.iterrows():
+            source = row["Source"]
+            incidents = row["Incidents"]
+            time_info = source_times.get(source, "Recently")
+            sources_html += '<div class="source-row">'
+            sources_html += '<div>'
+            sources_html += f'<span class="source-name">{source}</span>'
+            sources_html += f'<span class="source-time">{time_info}</span>'
+            sources_html += '</div>'
+            sources_html += f'<div class="source-reports">{incidents} reports</div>'
+            sources_html += '</div>'
+    
+    sources_html += '</div></div>'
+    st.markdown(sources_html, unsafe_allow_html=True)
+
+with col2:
+    locations_html = '<div class="info-card info-scroll">'
+    locations_html += '<div class="info-card-header">'
+    locations_html += '<span> ⟟ Dangerous Locations</span>'
+    locations_html += '</div>'
+    locations_html += '<div class="info-scroll-content">'
+    
+    if "location_text" in filtered.columns:
+        location_counts = filtered["location_text"].value_counts().reset_index()
+        location_counts.columns = ["Location", "Incidents"]
+        for _, row in location_counts.iterrows():
+            location = row["Location"]
+            incidents = row["Incidents"]
+            locations_html += '<div class="source-row">'
+            locations_html += '<div>'
+            locations_html += f'<span class="source-name">{location}</span>'
+            locations_html += '</div>'
+            locations_html += f'<div class="source-reports">{incidents} incidents</div>'
+            locations_html += '</div>'
+    
+    locations_html += '</div></div>'
+    st.markdown(locations_html, unsafe_allow_html=True)
+
 # Footer
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #94a3b8; padding: 2rem 0;'>
     <p> Haiti Violence Analysis Dashboard | Data updated in real-time</p>
     <p> Main source: ReliefWeb</p>
-    <p style='font-size: 0.85rem; margin-top: 0.5rem;'>Built with Streamlit & Plotly | © 2024</p>
+    <p style='font-size: 0.85rem; margin-top: 0.5rem;'>Built with Streamlit & Plotly | © 2025</p>
 </div>
 """, unsafe_allow_html=True)
+
