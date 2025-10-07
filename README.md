@@ -79,7 +79,7 @@ streamlit run app.py
 
 **Visit the live version here:**  
 [https://haiti-dashboard.streamlit.app](https://livehaiticrisisdashboard-eqz6uawzbzbpazrpn6n3zf.streamlit.app/#haiti-violence-analysis-dashboard)  
-*(Replace this with your actual Streamlit app link.)*
+
 
 ---
 
