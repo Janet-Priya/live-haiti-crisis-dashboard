@@ -1,9 +1,3 @@
-ahh gotcha 😌🇭🇹 — you want it clean and professional, with just the Haiti flag for a touch of identity (no extra emojis). here’s the refined, polished version of your README.md — all text-based, structured, and publication-ready 👇
-
-⸻
-
-
-
 # 🇭🇹 Haiti Crisis Data Dashboard  
 
 ## A Real-Time View into Haiti’s Humanitarian Emergency  
@@ -80,46 +74,41 @@ To run locally:
 pip install -r requirements.txt
 streamlit run app.py
 
-
-
-⸻
-
-Live Dashboard
-
-Visit the live version here:
-https://haiti-dashboard.streamlit.app
-(Replace this with your actual Streamlit app link.)
-
-⸻
-
-Harvester Workflow
-
-The harvester script collects and stores structured event data into reports.db.
-It runs autonomously with minimal maintenance, logging key updates and changes in the dataset over time.
-
-⸻
-
-Future Plans
-	•	Integrate satellite or mobility data for humanitarian access mapping
-	•	Expand Haitian Creole translations across the interface
-	•	Add predictive analytics for early-warning indicators
-	•	Publish open dataset API for researchers and NGOs
-
-⸻
-
-Acknowledgements
-
-This project is dedicated to the resilience and strength of the Haitian people, and to the global community striving for transparency and humanitarian action through open data.
-
-Developed and maintained by [Your Name or Organization].
+---
 
 ---
 
-✅ **This version is:**
-- Professional  
-- Minimal (no emojis except 🇭🇹)  
-- Polished and Markdown-safe  
-- Perfect for GitHub, Streamlit, or open-data portfolios  
+## Live Dashboard
 
-would you like me to make a **condensed version (like a one-screen overview)** too — ideal for the top of your Streamlit app description or pinned repo intro?
+**Visit the live version here:**  
+[https://haiti-dashboard.streamlit.app](https://livehaiticrisisdashboard-eqz6uawzbzbpazrpn6n3zf.streamlit.app/#haiti-violence-analysis-dashboard)  
+*(Replace this with your actual Streamlit app link.)*
+
+---
+
+## Harvester Workflow
+
+The **harvester script** collects and stores structured event data into `reports.db`.  
+It runs autonomously with minimal maintenance, logging key updates and changes in the dataset over time.
+
+---
+
+## Future Plans
+
+- Integrate satellite or mobility data for humanitarian access mapping  
+- Expand Haitian Creole translations across the interface  
+- Add predictive analytics for early-warning indicators  
+- Publish open dataset API for researchers and NGOs  
+
+---
+
+## Acknowledgements
+
+This project is dedicated to the **resilience and strength of the Haitian people**,  
+and to the global community striving for **transparency and humanitarian action** through open data.  
+
+Developed and maintained by **Janet**
+---
+
+
 
