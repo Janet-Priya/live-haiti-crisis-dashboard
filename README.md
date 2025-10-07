@@ -73,11 +73,8 @@ To run locally:
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
-
+```
 ---
-
----
-
 ## Live Dashboard
 
 **Visit the live version here:**  
