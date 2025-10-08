@@ -42,7 +42,7 @@ with col1:
     st.markdown("## Haiti Violence Analysis Dashboard")
 
 with col2:
-    if st.button("🔄 Refresh Data", use_container_width=True):
+    if st.button(" Refresh Data", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
 
