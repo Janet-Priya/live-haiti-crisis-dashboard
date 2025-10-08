@@ -9,10 +9,9 @@ from pathlib import Path
 import google.generativeai as genai
 import json
 import re
-
 DB_PATH = "reports.db"
 
-# Page configuration
+
 st.set_page_config(
     page_title="Haiti Violence Analysis Dashboard",
     page_icon="🫂",
@@ -20,39 +19,50 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Load external CSS
-def load_css(file_path):
-    """Load CSS from external file"""
-    css_file = Path(file_path)
-    if css_file.exists():
-        with open(css_file) as f:
-            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-    else:
-        st.warning(f"CSS file not found: {file_path}")
 
-# Load the external CSS file
-load_css("style.css")
-
-# Data loading
-@st.cache_data
+@st.cache_data(ttl=3600)
 def load_crisis_data():
+    """Load crisis data from SQLite database and clean date columns."""
     try:
         conn = sqlite3.connect(DB_PATH)
         df = pd.read_sql_query("SELECT * FROM reports ORDER BY timestamp DESC", conn)
         conn.close()
+
         if not df.empty:
-            df['created_date'] = pd.to_datetime(df['created_date'], errors='coerce')
-            df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+            df["created_date"] = pd.to_datetime(df["created_date"], errors="coerce")
+            df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+
         return df
     except Exception as e:
         st.error(f"Database error: {e}")
         return pd.DataFrame()
+
+col1, col2 = st.columns([6, 1])
+with col1:
+    st.markdown("## Haiti Violence Analysis Dashboard")
+
+with col2:
+    if st.button("🔄 Refresh Data", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
 
 df = load_crisis_data()
 
 if df.empty:
     st.error("No data found. Run harvester.py first.")
     st.stop()
+
+def load_css(file_path):
+    """Load CSS from external file"""
+    css_file = Path(file_path)
+    if css_file.exists():
+        with open(css_file) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    else:
+        st.warning(f"CSS file not found: {file_path}")
+
+# Load the external CSS file
+load_css("style.css")
 
 # Initialize Gemini with your API key from environment variable
 import os
