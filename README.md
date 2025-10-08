@@ -37,12 +37,13 @@ This dashboard aims to monitor, visualize, and communicate key crisis indicators
 - Data processed with Pandas, NumPy, and visualized using Plotly  
 
 > All data used is publicly available and intended solely for humanitarian research and awareness purposes.
-
+>This source for the entire dashboard is purely based on the updates from
+> ReliefWeb---> https://reliefweb.int
 ---
 
 ## Automated Data Updates  
 
-This project includes a GitHub Actions workflow (`.github/workflows/harvest.yml`) that automatically:  
+This project includes a GitHub Actions workflow (`.github/workflows/main.yml`) that automatically:  
 - Runs the harvester script every 24 hours  
 - Updates the local database (`reports.db`)  
 - Commits and pushes the latest dataset to the repository  
@@ -57,7 +58,8 @@ This project includes a GitHub Actions workflow (`.github/workflows/harvest.yml`
 | Component | Description |
 |------------|-------------|
 | Frontend | Streamlit (for live dashboards and UI) |
-| Backend | Python 3.11 |
+| Backend | Python 3.13 |
+| RDBMS | SQLite3 |
 | Data Processing | Pandas, NumPy |
 | Visualization | Plotly, Streamlit native charts |
 | Automation | GitHub Actions |
@@ -78,7 +80,7 @@ streamlit run app.py
 ## Live Dashboard
 
 **Visit the live version here:**  
-[https://haiti-dashboard.streamlit.app](https://livehaiticrisisdashboard-eqz6uawzbzbpazrpn6n3zf.streamlit.app/#haiti-violence-analysis-dashboard)  
+[https://haiti-dashboard.streamlit.app](https://haitian-conflict-dashboard.streamlit.app)  
 
 
 ---
@@ -86,16 +88,17 @@ streamlit run app.py
 ## Harvester Workflow
 
 The **harvester script** collects and stores structured event data into `reports.db`.  
-It runs autonomously with minimal maintenance, logging key updates and changes in the dataset over time.
+It runs without any repetition of reports 
 
 ---
 
 ## Future Plans
 
 - Integrate satellite or mobility data for humanitarian access mapping  
-- Expand Haitian Creole translations across the interface  
+- Expand Haitian Creole and French translations across the interface  
 - Add predictive analytics for early-warning indicators  
-- Publish open dataset API for researchers and NGOs  
+- Publish open dataset API for researchers and NGOs
+- Add more reliable resources to bring more insights.
 
 ---
 
@@ -103,6 +106,7 @@ It runs autonomously with minimal maintenance, logging key updates and changes i
 
 This project is dedicated to the **resilience and strength of the Haitian people**,  
 and to the global community striving for **transparency and humanitarian action** through open data.  
+Moreover it can be for the reference and an understanding of how conflicts still prevails in Haiti 
 
 Developed and maintained by **Janet**
 ---
